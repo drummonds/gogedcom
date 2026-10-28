@@ -1,4 +1,4 @@
-# 001 — The specification ABNF as a Go parser
+# 001 — The specification ABNF as a Go parser (#8)
 
 **Status:** in progress
 **Roadmap:** #1 — the specification's ABNF as a Go parser
