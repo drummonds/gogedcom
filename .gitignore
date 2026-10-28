@@ -1,0 +1,7 @@
+docs/**/*.html
+docs/**/*.svg
+.env
+gogedcom
+.tp-release-comment
+.tp-release-inflight
+.tp-release.yml

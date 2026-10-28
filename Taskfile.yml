@@ -1,0 +1,50 @@
+version: '3'
+
+vars:
+  # The GEDCOM 7 specification commit the vendored grammar comes from.
+  # The extracted ABNF lags the release tags (7.0.18's tag still carries the
+  # 7.0.17 Longitude typo), so it is pinned to a commit on main, not a tag.
+  GEDCOM7_COMMIT: 073b78b2f43027eb513de394344b3b3e4bba0489
+
+tasks:
+  fmt:
+    desc: Format Go code
+    cmds:
+      - go fmt ./...
+  vet:
+    desc: Vet Go code
+    cmds:
+      - go vet ./...
+  test:
+    desc: Run the tests
+    cmds:
+      - go test ./...
+  check:
+    desc: fmt, vet, test
+    cmds:
+      - task: fmt
+      - task: vet
+      - task: test
+  deps:tidy:
+    desc: Tidy the Go module
+    cmds:
+      - go mod tidy
+
+  grammar:fetch:
+    desc: Refetch the GEDCOM 7 ABNF from the specification repository at GEDCOM7_COMMIT
+    cmds:
+      - curl -sSfL -o gedcom7/grammar.abnf https://raw.githubusercontent.com/FamilySearch/GEDCOM/{{.GEDCOM7_COMMIT}}/extracted-files/grammar.abnf
+      - curl -sSfL -o gedcom7/LICENSE.gedcom https://raw.githubusercontent.com/FamilySearch/GEDCOM/{{.GEDCOM7_COMMIT}}/LICENSE
+      - echo "{{.GEDCOM7_COMMIT}}" > gedcom7/grammar.commit
+
+  docs:build:
+    desc: Render the docs into docs/ (landing page, stories, diagrams)
+    cmds:
+      - task-plus md2html --file index.md --dst docs
+      - for f in docs/stories/*.md; do task-plus md2html --file "$f" --dst docs/stories; done
+      - for f in docs/*.d2; do [ -e "$f" ] && d2 --scale 1 "$f" "${f%.d2}.svg" || true; done
+
+  clean:
+    desc: Remove build output
+    cmds:
+      - rm -rf docs/*.html docs/*.svg docs/stories/*.html gogedcom
