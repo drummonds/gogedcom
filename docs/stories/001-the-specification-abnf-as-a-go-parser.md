@@ -1,6 +1,6 @@
 # 001 — The specification ABNF as a Go parser (#8)
 
-**Status:** in progress
+**Status:** done locally
 **Roadmap:** #1 — the specification's ABNF as a Go parser
 
 ## Why
@@ -108,7 +108,7 @@ The engine, on RFC 5234's own constructs:
 
 ## Done when
 
-- [ ] tests express the acceptance table and pass
-- [ ] README
-- [ ] changelog entry
+- [x] tests express the acceptance table and pass
+- [x] README
+- [x] changelog entry
 - [ ] issue closed with a link to the release
