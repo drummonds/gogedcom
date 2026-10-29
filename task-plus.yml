@@ -12,3 +12,5 @@ pages_deploy:
   - type: rsync
     site: gogedcom
     dir: docs
+maturity:
+  code: 1

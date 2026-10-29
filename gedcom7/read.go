@@ -13,6 +13,7 @@ import (
 // Structure is a line with its substructures: the lines one level deeper
 // that follow it. CONT lines are folded into the payload.
 type Structure struct {
+	Line          int    // the file line it starts on, from 1
 	XRef          string // "@I1@" on a record, else ""
 	Tag           string
 	Payload       string
@@ -153,7 +154,7 @@ func parseLine(parser *gotreesitter.Parser, lang *gotreesitter.Language, line []
 		return nil, 0, fmt.Errorf("gedcom7: line %d: not a line", lineNo)
 	}
 	level, _ := strconv.Atoi(child(l, lang, "level").Text(src))
-	s := &Structure{}
+	s := &Structure{Line: lineNo}
 	if x := child(l, lang, "xref"); x != nil {
 		s.XRef = x.Text(src)
 	}

@@ -11,9 +11,10 @@ tree-sitter generate → ts2go → a gotreesitter blob embedded in `gedcom7`.
 
 ## Status
 
-Stories 001 and 002: the grammar, the six GEDCOM 7 data types (`DateValue`,
-`Time`, `Age`, `PersonalName`, `Latitude`, `Longitude`) typed, and a file
-read as a tree of structures. See [ROADMAP.md](ROADMAP.md).
+Stories 001 to 003: the grammar, the six GEDCOM 7 data types (`DateValue`,
+`Time`, `Age`, `PersonalName`, `Latitude`, `Longitude`) typed, a file read
+as a tree of structures, and the registry validating it: which structures
+go where, cardinality, enumerations. See [ROADMAP.md](ROADMAP.md).
 
 ## Vocabulary
 
@@ -29,19 +30,24 @@ GEDCOM 7's own words, used in code, tests and docs.
 | Pointer | A payload that refers to a record by its cross-reference identifier, or `@VOID@` |
 | Data type | A payload grammar: `DateValue`, `Time`, `Age`, `PersonalName`, … each a rule in the ABNF |
 | Grammar | `grammar/gedcom7.abnf`: the rules the parser is generated from; a line is typed by its tag |
+| Registry | The specification's `extracted-files/tags`, one YAML per URI-identified term, vendored in `gedcom7/registry/` |
+| Structure type | A registry term: a tag's meaning under a given superstructure (`DATE` is `DATE`, `DATE-exact` or `HEAD-DATE`), its payload type and substructures |
+| Cardinality | `{0:1}`, `{0:M}`, `{1:1}`, `{1:M}`: whether a substructure is required and whether it may repeat |
+| Violation | A structure that breaks the registry, reported with its line by `Validate` |
 
 ## Packages
 
 | Package | Holds |
 |---|---|
-| `gedcom7` | The generated parser, typed data types, the reader; the vendored spec ABNF as reference |
+| `gedcom7` | The generated parser, typed data types, the reader, the registry and its validator; the vendored spec ABNF as reference |
 | `grammar/` | The YABNF grammar, its generated `src/`, and the tree-sitter corpus tests |
 
 ## Toolchain
 
 `task grammar:generate` needs `tree-sitter2abnf` (Go), `npx tree-sitter-cli`
-(node) and a C compiler for `task grammar:test`. Consumers need none of
-them: the blob is in the module.
+(node) and a C compiler for `task grammar:test`. `task registry:fetch`
+refetches the registry. Consumers need none of them: the blob and the
+registry are in the module.
 
 ## Licence
 
