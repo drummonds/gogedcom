@@ -83,6 +83,9 @@ func TestRead(t *testing.T) {
 	if n := r.Find("NAME"); n == nil || n.Payload != "John /Smith/" {
 		t.Fatalf("NAME = %+v", n)
 	}
+	if doc.Header.Line != 1 || r.Line != 4 || r.Find("NAME").Line != 5 {
+		t.Fatalf("lines = %d, %d, %d; want 1, 4, 5", doc.Header.Line, r.Line, r.Find("NAME").Line)
+	}
 	if r.Find("BIRT") != nil {
 		t.Fatal("Find of an absent tag should be nil")
 	}
