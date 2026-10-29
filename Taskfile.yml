@@ -37,6 +37,13 @@ tasks:
       - curl -sSfL -o gedcom7/LICENSE.gedcom https://raw.githubusercontent.com/FamilySearch/GEDCOM/{{.GEDCOM7_COMMIT}}/LICENSE
       - echo "{{.GEDCOM7_COMMIT}}" > gedcom7/grammar.commit
 
+  registry:fetch:
+    desc: Refetch the GEDCOM 7 registry (extracted-files/tags, one YAML per term) at GEDCOM7_COMMIT into gedcom7/registry
+    cmds:
+      - rm -rf .task/spec && mkdir -p .task/spec
+      - curl -sSfL https://github.com/FamilySearch/GEDCOM/archive/{{.GEDCOM7_COMMIT}}.tar.gz | tar -xzf - -C .task/spec --strip-components=3 --wildcards '*/extracted-files/tags/*'
+      - rm -rf gedcom7/registry && mv .task/spec gedcom7/registry
+
   grammar:generate:
     desc: 'The tree-sitter chain: grammar/gedcom7.abnf -> grammar.json -> parser.c -> gedcom7/grammar_blobs/gedcom7.bin'
     dir: grammar
