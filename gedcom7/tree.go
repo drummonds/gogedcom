@@ -33,6 +33,40 @@ func firstError(n *gotreesitter.Node) *gotreesitter.Node {
 	return n
 }
 
+// firstGap is the first byte position under n that no leaf covers, and
+// whether there is one. gotreesitter (v0.7.0) skips a character the lexer
+// cannot match where the C parser reports an ERROR node (gotreesitter
+// issue #9: a second space after the level, a tab in a name, a lowercase
+// z after a time), so the tree is checked for text it does not account
+// for.
+func firstGap(n *gotreesitter.Node) (gotreesitter.Point, bool) {
+	at := n.StartByte()
+	point := n.StartPoint()
+	for _, c := range n.Children() {
+		if c.StartByte() > at {
+			return point, true
+		}
+		if p, ok := firstGap(c); ok {
+			return p, true
+		}
+		at, point = c.EndByte(), c.EndPoint()
+	}
+	return point, n.ChildCount() > 0 && at < n.EndByte()
+}
+
+// parseError is the error the tree holds, or nil: the first error or
+// missing node, else the first gap. line is the file line the parsed text
+// starts on.
+func parseError(root *gotreesitter.Node, lang *gotreesitter.Language, line int) error {
+	if e := firstError(root); e != nil {
+		return errorAt(e, lang, line)
+	}
+	if p, ok := firstGap(root); ok {
+		return fmt.Errorf("line %d: unexpected text at column %d", int(p.Row)+line, p.Column+1)
+	}
+	return nil
+}
+
 // errorAt describes an error node by its line and column (1-based); line
 // is the file line the parsed text starts on.
 func errorAt(n *gotreesitter.Node, lang *gotreesitter.Language, line int) error {

@@ -11,8 +11,9 @@ tree-sitter generate → ts2go → a gotreesitter blob embedded in `gedcom7`.
 
 ## Status
 
-Story 001: the grammar, the GEDCOM 7 `DateValue`, and a file read as a
-tree of structures. See [ROADMAP.md](ROADMAP.md).
+Stories 001 and 002: the grammar, the six GEDCOM 7 data types (`DateValue`,
+`Time`, `Age`, `PersonalName`, `Latitude`, `Longitude`) typed, and a file
+read as a tree of structures. See [ROADMAP.md](ROADMAP.md).
 
 ## Vocabulary
 

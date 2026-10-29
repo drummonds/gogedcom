@@ -145,8 +145,8 @@ func parseLine(parser *gotreesitter.Parser, lang *gotreesitter.Language, line []
 	}
 	defer tree.Release()
 	root := tree.RootNode()
-	if e := firstError(root); e != nil {
-		return nil, 0, fmt.Errorf("gedcom7: %w", errorAt(e, lang, lineNo))
+	if err := parseError(root, lang, lineNo); err != nil {
+		return nil, 0, fmt.Errorf("gedcom7: %w", err)
 	}
 	l := child(root, lang, "line")
 	if l == nil {

@@ -115,10 +115,6 @@ func TestReadErrors(t *testing.T) {
 		"no header":     "0 @I1@ INDI\n0 TRLR\n",
 	}
 	for name, src := range cases {
-		if name == "two spaces" {
-			t.Log("skipped: gotreesitter v0.7.0 accepts the second space; the C parser reports an ERROR")
-			continue
-		}
 		_, err := Read(strings.NewReader(src))
 		if err == nil {
 			t.Errorf("%s: should fail", name)

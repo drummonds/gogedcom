@@ -15,3 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   embedded in `gedcom7`; `task grammar:test` runs the corpus.
 - `gedcom7`: `ParseDate` to a typed `DateValue`; `Read` of a file as a tree
   of structures, the first line the grammar rejects being the error.
+- `gedcom7`: `ParseTime`, `ParseAge`, `ParsePersonalName`, `ParseLatitude`
+  and `ParseLongitude` to the typed `Time`, `Age`, `PersonalName`,
+  `Latitude` and `Longitude`, each writing itself back with `String()`.
+  A character the grammar cannot place (a second space after the level, a
+  tab in a name) is an error, as the C parser reports it.

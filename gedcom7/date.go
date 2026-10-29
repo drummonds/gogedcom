@@ -107,36 +107,18 @@ func (v DateValue) String() string {
 // the line "0 DATE <s>". Where the grammar allows two readings (JULIAN
 // 1700 is a calendar or a month) the first alternative wins: the calendar.
 func ParseDate(s string) (DateValue, error) {
-	if strings.ContainsAny(s, "\r\n") {
-		return DateValue{}, fmt.Errorf("gedcom7: date %q: line break", s)
-	}
-	line := "0 DATE"
-	if s != "" {
-		line += " " + s
-	}
-	// gotreesitter (v0.7.0) mis-parses input that ends right after a GLR
-	// fork; a trailing EOL avoids it.
-	src := []byte(line + "\n")
-	tree, lang, err := parse(src)
+	p, err := parsePayload("date", "DATE", s)
 	if err != nil {
-		return DateValue{}, fmt.Errorf("gedcom7: date %q: %w", s, err)
+		return DateValue{}, err
 	}
-	defer tree.Release()
-	root := tree.RootNode()
-	if e := firstError(root); e != nil {
-		return DateValue{}, fmt.Errorf("gedcom7: date %q: %w", s, errorAt(e, lang, 1))
-	}
-	dateLine := child(child(root, lang, "line"), lang, "date_line")
-	if dateLine == nil {
-		return DateValue{}, fmt.Errorf("gedcom7: date %q: not a DATE line", s)
-	}
-	value := child(dateLine, lang, "date_value")
+	defer p.release()
+	value := p.value("date_value")
 	if value == nil {
 		return DateValue{}, nil
 	}
-	v := dateValue(value, src, lang)
+	v := dateValue(value, p.src, p.lang)
 	for _, d := range []*Date{v.From, v.To} {
-		if d != nil && (d.Day < 0 || d.Day > 31 || (d.Day == 0 && child(value, lang, "day") != nil)) {
+		if d != nil && (d.Day < 0 || d.Day > 31 || (d.Day == 0 && child(value, p.lang, "day") != nil)) {
 			return DateValue{}, fmt.Errorf("gedcom7: date %q: day %d", s, d.Day)
 		}
 	}

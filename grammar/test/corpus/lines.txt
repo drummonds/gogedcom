@@ -58,3 +58,17 @@ Two spaces are an error
 1  NAME x
 ----
 (document (line (level) (ERROR) (name_line (personal_name (name_str)))))
+
+================
+A lowercase z after a time is an error
+================
+0 TIME 12:30z
+---
+(document (line (level) (time_line (time (hour) (minute)))) (ERROR (UNEXPECTED 'z')))
+
+================
+A tab in a name is an error
+================
+0 NAME John	/Smith/
+---
+(document (line (level) (name_line (personal_name (name_str) (ERROR (UNEXPECTED '\t')) (name_str)))))
