@@ -1,0 +1,60 @@
+================
+Header, record, name, trailer
+================
+0 HEAD
+1 GEDC
+2 VERS 7.0
+0 @I1@ INDI
+1 NAME John /Smith/
+0 TRLR
+----
+(document
+  (line (level) (tag_line (tag)))
+  (line (level) (tag_line (tag)))
+  (line (level) (tag_line (tag) (text)))
+  (line (level) (xref) (tag_line (tag)))
+  (line (level) (name_line (personal_name (name_str) (name_str))))
+  (line (level) (tag_line (tag))))
+
+================
+Pointer and void
+================
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @VOID@
+----
+(document
+  (line (level) (xref) (tag_line (tag)))
+  (line (level) (tag_line (tag) (pointer (xref))))
+  (line (level) (tag_line (tag) (pointer (void)))))
+
+================
+Text with a doubled at sign and an empty CONT
+================
+0 @N1@ SNOTE mail @@home
+1 CONT
+----
+(document
+  (line (level) (xref) (tag_line (tag) (text)))
+  (line (level) (tag_line (tag))))
+
+================
+Time, age, latitude, longitude
+================
+0 TIME 12:30:05.5Z
+0 AGE > 35y 2m
+0 LATI N51.5
+0 LONG W1.5
+----
+(document
+  (line (level) (time_line (time (hour) (minute) (second) (fraction))))
+  (line (level) (age_line (age (age_bound) (age_duration (years) (months)))))
+  (line (level) (lati_line (latitude)))
+  (line (level) (long_line (longitude))))
+
+================
+Two spaces are an error
+================
+1  NAME x
+----
+(document (line (level) (ERROR) (name_line (personal_name (name_str)))))

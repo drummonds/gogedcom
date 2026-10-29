@@ -1,0 +1,83 @@
+================
+Day month year
+================
+0 DATE 12 JAN 1990
+----
+(document (line (level) (date_line (date_value (date (day (integer)) (month) (year (integer)))))))
+
+================
+Month year
+================
+0 DATE JAN 1990
+----
+(document (line (level) (date_line (date_value (date (month) (year (integer)))))))
+
+================
+Year only
+================
+0 DATE 1990
+----
+(document (line (level) (date_line (date_value (date (year (integer)))))))
+
+================
+Julian calendar with day
+================
+0 DATE JULIAN 1 JAN 1700
+----
+(document (line (level) (date_line (date_value (date (calendar) (day (integer)) (month) (year (integer)))))))
+
+================
+Epoch
+================
+0 DATE 100 BCE
+----
+(document (line (level) (date_line (date_value (date (year (integer)) (epoch))))))
+
+================
+About
+================
+0 DATE ABT 1850
+----
+(document (line (level) (date_line (date_value (date_approx (date (year (integer))))))))
+
+================
+Between
+================
+0 DATE BET 1850 AND 1860
+----
+(document (line (level) (date_line (date_value (date_range (date (year (integer))) (date (year (integer))))))))
+
+================
+Before
+================
+0 DATE BEF 1850
+----
+(document (line (level) (date_line (date_value (date_range (date (year (integer))))))))
+
+================
+Period from to
+================
+0 DATE FROM 1850 TO 1860
+----
+(document (line (level) (date_line (date_value (date_period (date (year (integer))) (date (year (integer))))))))
+
+================
+Period to only
+================
+0 DATE TO 1860
+----
+(document (line (level) (date_line (date_value (date_period (date (year (integer))))))))
+
+================
+Empty date
+================
+0 DATE
+----
+(document (line (level) (date_line)))
+
+================
+Day without month is an error
+================
+0 DATE 12 JAN
+----
+(document (line (level) (date_line)) (ERROR (day (integer)) (month)))

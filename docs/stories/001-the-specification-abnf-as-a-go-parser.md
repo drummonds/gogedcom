@@ -23,40 +23,32 @@ grammar (roadmap #5) and whatever extension grammars come later (#4).
 
 ## What changes
 
-- `abnf`: `Parse(src)` reads a grammar; `g.Match(rule, input)` returns the
-  derivation as a `Node` tree (rule name, span, children), or an error naming
-  the furthest position reached; `g.MatchWhere` adds a constraint that
-  rejects a derivation. `g.Undefined()` lists rule names used but not
-  defined, so a vendored grammar's external references are explicit.
-- `gedcom7/grammar.abnf`, `LICENSE.gedcom`, `grammar.commit`: the upstream
-  grammar vendored at a pinned commit by `task grammar:fetch` (Apache 2.0,
-  FamilySearch).
-- `gedcom7.Grammar()`: the vendored grammar, parsed once.
-- `gedcom7.ParseDate(s)`: a `DateValue` from the `DateValue` rule, typed as
-  the spec names it: calendar, day, month, year, epoch, and the kind of
-  value (date, period, range, approximation).
-- `gedcom7.Read(r)`: a file as a tree of structures, each line checked
-  against the `Line` rule; `CONT` folded into its parent's payload.
+- `grammar/gedcom7.abnf`: the GEDCOM 7 grammar in YABNF, written from the
+  vendored `gedcom7/grammar.abnf` (the spec's `extracted-files/grammar.abnf`
+  at a pinned commit, Apache 2.0, FamilySearch, refetched by
+  `task grammar:fetch`). A line is typed by its tag: `DATE`, `TIME`, `AGE`,
+  `NAME`, `LATI` and `LONG` carry their data types; every other tag a
+  pointer or text. Three GLR conflicts are declared: day/year,
+  calendar/month, and the date before a following keyword.
+- `task grammar:generate`: the tree-sitter chain, as the other parsers run
+  it: `tree-sitter2abnf` → `grammar/src/grammar.json` →
+  `tree-sitter generate` → `grammar/src/parser.c` → `ts2go` →
+  `gedcom7/grammar_gen.go` and `gedcom7/grammar_blobs/gedcom7.bin`.
+  `task grammar:test` runs the corpus under `grammar/test/corpus`.
+- `gedcom7`: `Gedcom7Language()` loads the blob (gzip of the gob-encoded
+  `gotreesitter.Language`, as gotreesitter's own registry holds them);
+  `ParseDate(s)` reads a `DateValue` typed as the spec names it: calendar,
+  day, month, year, epoch, and the kind of value (date, period, range,
+  approximation); `Read(r)` reads a file as a tree of structures, the
+  first line the grammar rejects being the error, `CONT` folded into its
+  parent's payload.
 
 ## Acceptance
 
-The engine, on RFC 5234's own constructs:
-
-| Grammar | Input | Outcome |
-|---|---|---|
-| `a = "ab"` | `AB` | match (bare strings are case-insensitive) |
-| `a = %s"ab"` | `AB` | no match |
-| `a = %x41-43` | `B` | match |
-| `a = %x0D.0A` | CR LF | match |
-| `a = 2*3DIGIT` | `12`, `123` | match; `1`, `1234` fail |
-| `a = *DIGIT "x"` | `12x`, `x` | match |
-| `a = b \| c`, `b = "1"`, `c = "2"` | `2` | match, node `c` under `a` |
-| `a = "1" / "12"` | `12` | match (full backtracking, not ordered choice alone) |
-| `a = b` `b =/ "z"` | `z` | match (incremental alternative) |
-| `a = [ "x" ] "y"` | `y`, `xy` | match |
-| `a = b` with `b` undefined | — | `Undefined()` lists `b`; `Match` errors when it reaches `b` |
-| `a = b / c`, constraint rejects `b` | `42` | match through `c` |
-| any | input left over | error at the furthest position reached |
+The grammar, in `grammar/test/corpus` (`task grammar:test`): the dates
+below as trees; a header, record, name and trailer; a pointer and `@VOID@`;
+text with a doubled `@` and an empty `CONT`; time, age, latitude and
+longitude; two spaces after the level as an `ERROR`.
 
 `ParseDate`:
 
@@ -100,11 +92,14 @@ The engine, on RFC 5234's own constructs:
 
 | Choice | Taken | Alternative | Why |
 |---|---|---|---|
-| How the ABNF becomes a parser | An ABNF interpreter in Go: the grammar file is read as it is | tree-sitter: YABNF → `tree-sitter2abnf` → `tree-sitter generate` → `ts2go` → gotreesitter | The upstream file is consumed verbatim, so a spec bump is a file swap and nothing is transcribed. Payloads are short strings: no need for incremental parsing or error recovery. No node or Rust toolchain in the build. `tree-sitter2abnf` reads the same file, so highlighting and railroad diagrams stay available later |
-| Matching semantics | Full backtracking over alternatives in written order; the first complete derivation wins | PEG ordered choice; a GLR all-derivations parser | PEG would reject `"1" / "12"` on `12`; all derivations are not needed for a data type. Where the spec is ambiguous (`JULIAN 1990`) the written order decides, and the test pins it |
-| The file's lines | Matched one at a time against the `Line` rule | A `*Line` rule over the whole file | Recursion depth is per line, not per file; the error names the line |
-| Pinning | A commit on `main`, recorded in `grammar.commit` | A release tag | The extracted file lagged the 7.0.18 tag |
-| What the grammar leaves to comments | `MatchWhere(rule, input, accept)`: a constraint called as each rule node completes; a false backtracks | Edit the vendored grammar to enumerate months; validate after the match and retry | `month = stdTag ; constrained by calendar` makes `ABT 1850` a month and a year; the constraint keeps the file verbatim and the derivation right. The months table in `date.go` moves to the registry's YAML in roadmap #2 |
+| How the ABNF becomes a parser | The tree-sitter chain, as the other parsers (goluca, pta): YABNF → `tree-sitter2abnf` → `tree-sitter generate` → `ts2go` → gotreesitter | An ABNF interpreter reading the spec's file verbatim (built first, then replaced) | One toolchain across the parsers; highlighting, queries and railroad diagrams come with it. The cost is that the YABNF is a transcription: `tree-sitter2abnf` reads `%s` strings and `@pattern`, not `%x` ranges, so the spec's file is the reference the grammar is written from and checked against, not the input |
+| Where the grammar lives | In this repo under `grammar/`, its blob embedded by `gedcom7` | A `tree-sitter-gedcom7` repo registered in gotreesitter's manifest | The blob format is gotreesitter's public `Language` type, so no registry change is needed; a grammar repo can be split out when editor support is wanted |
+| How a payload is typed | By its tag, in the grammar: `DATE` carries `date_value`, `NAME` `personal_name`, and so on | One grammar per data type; a sentinel prefix selecting a start rule | A tree-sitter grammar has one start rule. The tag is how the spec types payloads, and the whole file parses in one pass. `ParseDate` parses the line `0 DATE <s>` |
+| Months | Listed in the grammar per calendar | `month = stdTag ; constrained by calendar` as the spec writes it | Without the list `ABT 1850` is the month `ABT` of 1850. The list is what the registry's YAML says; roadmap #2 generates it from there |
+| Day range | Checked in Go after the parse | A `[0-9]{1,2}` token beside `integer` | Two tokens matching the same text is a lexer ambiguity; the grammar keeps one `integer` and the reader rejects a day over 31 |
+| The file's lines | A flat sequence in the grammar; nesting by level in Go | Level nesting in the grammar, with an external scanner | Context-sensitive nesting needs a scanner; the reader already needs the levels for `CONT` and `TRLR` |
+| Pinning the reference | A commit on `main`, recorded in `grammar.commit` | A release tag | The extracted file lagged the 7.0.18 tag |
+| EOL at end of input | Appended by `ParseDate` and `Read` when absent | Report upstream and wait | gotreesitter v0.7.0 returns a wrong root when input ends right after a GLR fork; the C parser does not. To report |
 
 ## Done when
 

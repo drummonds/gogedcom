@@ -1,0 +1,1250 @@
+{
+  "name": "gedcom7",
+  "word": "tag",
+  "rules": {
+    "document": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "line"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "_eol"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "line"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_eol"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "line": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "level"
+        },
+        {
+          "type": "STRING",
+          "value": " "
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "xref"
+                },
+                {
+                  "type": "STRING",
+                  "value": " "
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_payload_line"
+        }
+      ]
+    },
+    "level": {
+      "type": "PATTERN",
+      "value": "0|[1-9][0-9]*"
+    },
+    "xref": {
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "@"
+          },
+          {
+            "type": "PATTERN",
+            "value": "[A-Z0-9_]+"
+          },
+          {
+            "type": "STRING",
+            "value": "@"
+          }
+        ]
+      }
+    },
+    "_eol": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "\n"
+        },
+        {
+          "type": "STRING",
+          "value": "\r\n"
+        },
+        {
+          "type": "STRING",
+          "value": "\r"
+        }
+      ]
+    },
+    "_payload_line": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "date_line"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "time_line"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "age_line"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "name_line"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "lati_line"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "long_line"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "tag_line"
+        }
+      ]
+    },
+    "date_line": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "DATE"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": " "
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "date_value"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "time_line": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "TIME"
+        },
+        {
+          "type": "STRING",
+          "value": " "
+        },
+        {
+          "type": "SYMBOL",
+          "name": "time"
+        }
+      ]
+    },
+    "age_line": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "AGE"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": " "
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "age"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "name_line": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "NAME"
+        },
+        {
+          "type": "STRING",
+          "value": " "
+        },
+        {
+          "type": "SYMBOL",
+          "name": "personal_name"
+        }
+      ]
+    },
+    "lati_line": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "LATI"
+        },
+        {
+          "type": "STRING",
+          "value": " "
+        },
+        {
+          "type": "SYMBOL",
+          "name": "latitude"
+        }
+      ]
+    },
+    "long_line": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "LONG"
+        },
+        {
+          "type": "STRING",
+          "value": " "
+        },
+        {
+          "type": "SYMBOL",
+          "name": "longitude"
+        }
+      ]
+    },
+    "tag_line": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "tag"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": " "
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "pointer"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "text"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "tag": {
+      "type": "PATTERN",
+      "value": "[A-Z][A-Z0-9_]*|_[A-Z0-9_]+"
+    },
+    "ext_tag": {
+      "type": "PATTERN",
+      "value": "_[A-Z0-9_]+"
+    },
+    "pointer": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "xref"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "void"
+        }
+      ]
+    },
+    "void": {
+      "type": "STRING",
+      "value": "@VOID@"
+    },
+    "text": {
+      "type": "PATTERN",
+      "value": "(@@|[^@\\r\\n])[^\\r\\n]*"
+    },
+    "date_value": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "date"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "date_period"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "date_range"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "date_approx"
+        }
+      ]
+    },
+    "date_period": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "TO"
+            },
+            {
+              "type": "STRING",
+              "value": " "
+            },
+            {
+              "type": "SYMBOL",
+              "name": "date"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "FROM"
+            },
+            {
+              "type": "STRING",
+              "value": " "
+            },
+            {
+              "type": "SYMBOL",
+              "name": "date"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": " "
+                    },
+                    {
+                      "type": "STRING",
+                      "value": "TO"
+                    },
+                    {
+                      "type": "STRING",
+                      "value": " "
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "date"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "date_range": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "BET"
+            },
+            {
+              "type": "STRING",
+              "value": " "
+            },
+            {
+              "type": "SYMBOL",
+              "name": "date"
+            },
+            {
+              "type": "STRING",
+              "value": " "
+            },
+            {
+              "type": "STRING",
+              "value": "AND"
+            },
+            {
+              "type": "STRING",
+              "value": " "
+            },
+            {
+              "type": "SYMBOL",
+              "name": "date"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "AFT"
+            },
+            {
+              "type": "STRING",
+              "value": " "
+            },
+            {
+              "type": "SYMBOL",
+              "name": "date"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "BEF"
+            },
+            {
+              "type": "STRING",
+              "value": " "
+            },
+            {
+              "type": "SYMBOL",
+              "name": "date"
+            }
+          ]
+        }
+      ]
+    },
+    "date_approx": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "ABT"
+            },
+            {
+              "type": "STRING",
+              "value": "CAL"
+            },
+            {
+              "type": "STRING",
+              "value": "EST"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": " "
+        },
+        {
+          "type": "SYMBOL",
+          "name": "date"
+        }
+      ]
+    },
+    "date": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "calendar"
+                },
+                {
+                  "type": "STRING",
+                  "value": " "
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SEQ",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "day"
+                        },
+                        {
+                          "type": "STRING",
+                          "value": " "
+                        }
+                      ]
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "month"
+                },
+                {
+                  "type": "STRING",
+                  "value": " "
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "year"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": " "
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "epoch"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "calendar": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "GREGORIAN"
+        },
+        {
+          "type": "STRING",
+          "value": "JULIAN"
+        },
+        {
+          "type": "STRING",
+          "value": "FRENCH_R"
+        },
+        {
+          "type": "STRING",
+          "value": "HEBREW"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ext_tag"
+        }
+      ]
+    },
+    "day": {
+      "type": "SYMBOL",
+      "name": "integer"
+    },
+    "year": {
+      "type": "SYMBOL",
+      "name": "integer"
+    },
+    "month": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "JAN"
+        },
+        {
+          "type": "STRING",
+          "value": "FEB"
+        },
+        {
+          "type": "STRING",
+          "value": "MAR"
+        },
+        {
+          "type": "STRING",
+          "value": "APR"
+        },
+        {
+          "type": "STRING",
+          "value": "MAY"
+        },
+        {
+          "type": "STRING",
+          "value": "JUN"
+        },
+        {
+          "type": "STRING",
+          "value": "JUL"
+        },
+        {
+          "type": "STRING",
+          "value": "AUG"
+        },
+        {
+          "type": "STRING",
+          "value": "SEP"
+        },
+        {
+          "type": "STRING",
+          "value": "OCT"
+        },
+        {
+          "type": "STRING",
+          "value": "NOV"
+        },
+        {
+          "type": "STRING",
+          "value": "DEC"
+        },
+        {
+          "type": "STRING",
+          "value": "VEND"
+        },
+        {
+          "type": "STRING",
+          "value": "BRUM"
+        },
+        {
+          "type": "STRING",
+          "value": "FRIM"
+        },
+        {
+          "type": "STRING",
+          "value": "NIVO"
+        },
+        {
+          "type": "STRING",
+          "value": "PLUV"
+        },
+        {
+          "type": "STRING",
+          "value": "VENT"
+        },
+        {
+          "type": "STRING",
+          "value": "GERM"
+        },
+        {
+          "type": "STRING",
+          "value": "FLOR"
+        },
+        {
+          "type": "STRING",
+          "value": "PRAI"
+        },
+        {
+          "type": "STRING",
+          "value": "MESS"
+        },
+        {
+          "type": "STRING",
+          "value": "THER"
+        },
+        {
+          "type": "STRING",
+          "value": "FRUC"
+        },
+        {
+          "type": "STRING",
+          "value": "COMP"
+        },
+        {
+          "type": "STRING",
+          "value": "TSH"
+        },
+        {
+          "type": "STRING",
+          "value": "CSH"
+        },
+        {
+          "type": "STRING",
+          "value": "KSL"
+        },
+        {
+          "type": "STRING",
+          "value": "TVT"
+        },
+        {
+          "type": "STRING",
+          "value": "SHV"
+        },
+        {
+          "type": "STRING",
+          "value": "ADR"
+        },
+        {
+          "type": "STRING",
+          "value": "ADS"
+        },
+        {
+          "type": "STRING",
+          "value": "NSN"
+        },
+        {
+          "type": "STRING",
+          "value": "IYR"
+        },
+        {
+          "type": "STRING",
+          "value": "SVN"
+        },
+        {
+          "type": "STRING",
+          "value": "TMZ"
+        },
+        {
+          "type": "STRING",
+          "value": "AAV"
+        },
+        {
+          "type": "STRING",
+          "value": "ELL"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ext_tag"
+        }
+      ]
+    },
+    "epoch": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "BCE"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ext_tag"
+        }
+      ]
+    },
+    "integer": {
+      "type": "PATTERN",
+      "value": "[0-9]+"
+    },
+    "time": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "hour"
+        },
+        {
+          "type": "STRING",
+          "value": ":"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "minute"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": ":"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "second"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SEQ",
+                      "members": [
+                        {
+                          "type": "STRING",
+                          "value": "."
+                        },
+                        {
+                          "type": "SYMBOL",
+                          "name": "fraction"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "Z"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "hour": {
+      "type": "PATTERN",
+      "value": "[0-9]|[01][0-9]|2[0-3]"
+    },
+    "minute": {
+      "type": "PATTERN",
+      "value": "[0-5][0-9]"
+    },
+    "second": {
+      "type": "PATTERN",
+      "value": "[0-5][0-9]"
+    },
+    "fraction": {
+      "type": "PATTERN",
+      "value": "[0-9]+"
+    },
+    "age": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "age_bound"
+                },
+                {
+                  "type": "STRING",
+                  "value": " "
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "age_duration"
+        }
+      ]
+    },
+    "age_bound": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "\u003c"
+        },
+        {
+          "type": "STRING",
+          "value": "\u003e"
+        }
+      ]
+    },
+    "age_duration": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "years"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": " "
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "months"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": " "
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "weeks"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": " "
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "days"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "months"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": " "
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "weeks"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": " "
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "days"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "weeks"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": " "
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "days"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "days"
+        }
+      ]
+    },
+    "years": {
+      "type": "PATTERN",
+      "value": "[0-9]+y"
+    },
+    "months": {
+      "type": "PATTERN",
+      "value": "[0-9]+m"
+    },
+    "weeks": {
+      "type": "PATTERN",
+      "value": "[0-9]+w"
+    },
+    "days": {
+      "type": "PATTERN",
+      "value": "[0-9]+d"
+    },
+    "personal_name": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "name_str"
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "name_str"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "STRING",
+              "value": "/"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "name_str"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "STRING",
+              "value": "/"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "name_str"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "name_str": {
+      "type": "PATTERN",
+      "value": "[^/\\t\\r\\n]+"
+    },
+    "latitude": {
+      "type": "PATTERN",
+      "value": "[NS](90|[0-8]?[0-9])(\\.[0-9]+)?"
+    },
+    "longitude": {
+      "type": "PATTERN",
+      "value": "[EW](180|1[0-7][0-9]|[0-9]?[0-9])(\\.[0-9]+)?"
+    }
+  },
+  "conflicts": [
+    [
+      "day",
+      "year"
+    ],
+    [
+      "calendar",
+      "month"
+    ],
+    [
+      "date"
+    ]
+  ]
+}

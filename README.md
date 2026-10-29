@@ -3,14 +3,16 @@
 GEDCOM 7 and GEDCOM 5.5.1 in Go, parsed from the specification's own ABNF
 rather than a hand transcription of it, with a 5.5.1 to 7 converter.
 
-The GEDCOM 7 grammar is the specification's `extracted-files/grammar.abnf`,
-vendored at a pinned commit (`gedcom7/grammar.commit`) and read by the
-`abnf` package as it is. A spec bump is `task grammar:fetch` and the tests.
+The GEDCOM 7 grammar (`grammar/gedcom7.abnf`, YABNF) is written from the
+specification's `extracted-files/grammar.abnf`, vendored at a pinned commit
+(`gedcom7/grammar.commit`, `task grammar:fetch`). It becomes a parser by
+the tree-sitter chain, `task grammar:generate`: tree-sitter2abnf →
+tree-sitter generate → ts2go → a gotreesitter blob embedded in `gedcom7`.
 
 ## Status
 
-Story 001 in progress: the ABNF engine, the GEDCOM 7 `DateValue`, and a
-file read as a tree of structures. See [ROADMAP.md](ROADMAP.md).
+Story 001: the grammar, the GEDCOM 7 `DateValue`, and a file read as a
+tree of structures. See [ROADMAP.md](ROADMAP.md).
 
 ## Vocabulary
 
@@ -25,14 +27,20 @@ GEDCOM 7's own words, used in code, tests and docs.
 | Payload | The line's value: text, a pointer, or a typed data type |
 | Pointer | A payload that refers to a record by its cross-reference identifier, or `@VOID@` |
 | Data type | A payload grammar: `DateValue`, `Time`, `Age`, `PersonalName`, … each a rule in the ABNF |
-| Grammar | A parsed ABNF: named rules; `Match` gives a derivation as a tree of rule nodes |
+| Grammar | `grammar/gedcom7.abnf`: the rules the parser is generated from; a line is typed by its tag |
 
 ## Packages
 
 | Package | Holds |
 |---|---|
-| `abnf` | RFC 5234 + RFC 7405 reader and matcher; `\|` accepted for alternation (house style) |
-| `gedcom7` | The vendored grammar, typed data types, the reader |
+| `gedcom7` | The generated parser, typed data types, the reader; the vendored spec ABNF as reference |
+| `grammar/` | The YABNF grammar, its generated `src/`, and the tree-sitter corpus tests |
+
+## Toolchain
+
+`task grammar:generate` needs `tree-sitter2abnf` (Go), `npx tree-sitter-cli`
+(node) and a C compiler for `task grammar:test`. Consumers need none of
+them: the blob is in the module.
 
 ## Licence
 

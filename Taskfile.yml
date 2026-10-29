@@ -37,6 +37,22 @@ tasks:
       - curl -sSfL -o gedcom7/LICENSE.gedcom https://raw.githubusercontent.com/FamilySearch/GEDCOM/{{.GEDCOM7_COMMIT}}/LICENSE
       - echo "{{.GEDCOM7_COMMIT}}" > gedcom7/grammar.commit
 
+  grammar:generate:
+    desc: 'The tree-sitter chain: grammar/gedcom7.abnf -> grammar.json -> parser.c -> gedcom7/grammar_blobs/gedcom7.bin'
+    dir: grammar
+    preconditions:
+      - sh: which tree-sitter2abnf
+        msg: "tree-sitter2abnf not found: go install git.bytestone.uk/hum3/tree-sitter2abnf/cmd/tree-sitter2abnf@latest"
+    cmds:
+      - tree-sitter2abnf -o src/grammar.json gedcom7.abnf
+      - npx tree-sitter-cli generate src/grammar.json
+      - go run git.bytestone.uk/hum3/gotreesitter/cmd/ts2go -input src/parser.c -output ../gedcom7/grammar_gen.go -package gedcom7 -name gedcom7
+  grammar:test:
+    desc: Run the tree-sitter corpus under grammar/test/corpus (needs a C compiler)
+    dir: grammar
+    cmds:
+      - npx tree-sitter-cli test
+
   docs:build:
     desc: Render the docs into docs/ (landing page, stories, diagrams)
     cmds:
@@ -47,4 +63,4 @@ tasks:
   clean:
     desc: Remove build output
     cmds:
-      - rm -rf docs/*.html docs/*.svg docs/stories/*.html gogedcom
+      - rm -rf docs/*.html docs/*.svg docs/stories/*.html gogedcom grammar/src/tree_sitter grammar/node_modules

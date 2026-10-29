@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `abnf`: an RFC 5234 + RFC 7405 reader and matcher (`|` accepted for
-  alternation); `Match`, `MatchWhere` with a constraint, `Undefined`.
-- `gedcom7`: the specification's `grammar.abnf` vendored at a pinned commit
-  (`task grammar:fetch`); `ParseDate` to a typed `DateValue`; `Read` of a
-  file as a tree of structures, every line checked against the `Line` rule.
+- `grammar/gedcom7.abnf`: GEDCOM 7 in YABNF, from the specification's
+  `grammar.abnf` vendored at a pinned commit (`task grammar:fetch`);
+  `task grammar:generate` runs the tree-sitter chain to a gotreesitter blob
+  embedded in `gedcom7`; `task grammar:test` runs the corpus.
+- `gedcom7`: `ParseDate` to a typed `DateValue`; `Read` of a file as a tree
+  of structures, the first line the grammar rejects being the error.

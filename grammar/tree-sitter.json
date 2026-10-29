@@ -1,0 +1,18 @@
+{
+  "grammars": [
+    {
+      "name": "gedcom7",
+      "camelcase": "Gedcom7",
+      "scope": "source.gedcom7",
+      "path": ".",
+      "file-types": ["ged"]
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Tree-sitter grammar for GEDCOM 7, from the specification's ABNF",
+    "links": { "repository": "https://git.bytestone.uk/hum3/gogedcom" }
+  },
+  "bindings": { "c": false, "go": false, "node": false, "python": false, "rust": false, "swift": false }
+}

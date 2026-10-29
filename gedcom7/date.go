@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"git.bytestone.uk/hum3/gogedcom/abnf"
+	"git.bytestone.uk/hum3/gotreesitter"
 )
 
 // Kind is which of the DateValue rule's alternatives a value is.
@@ -103,107 +103,98 @@ func (v DateValue) String() string {
 	return ""
 }
 
-// months of each calendar, as the specification's registry lists them.
-// Roadmap #2 reads them from the registry's YAML instead.
-var months = map[string][]string{
-	"GREGORIAN": {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"},
-	"JULIAN":    {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"},
-	"FRENCH_R":  {"VEND", "BRUM", "FRIM", "NIVO", "PLUV", "VENT", "GERM", "FLOR", "PRAI", "MESS", "THER", "FRUC", "COMP"},
-	"HEBREW":    {"TSH", "CSH", "KSL", "TVT", "SHV", "ADR", "ADS", "NSN", "IYR", "SVN", "TMZ", "AAV", "ELL"},
-}
-
-// wellFormedDate is what the grammar says in comments: a date's month is
-// one of its calendar's (any, for an extension calendar) and its day is a
-// day of a month. Without it ABT 1850 reads as the month ABT of 1850.
-func wellFormedDate(n *abnf.Node) bool {
-	if n.Rule != "date" {
-		return true
-	}
-	if d := n.Find("day"); d != nil {
-		if v, _ := strconv.Atoi(d.Text); v < 1 || v > 31 {
-			return false
-		}
-	}
-	m := n.Find("month")
-	if m == nil {
-		return true
-	}
-	cal := "GREGORIAN"
-	if c := n.Find("calendar"); c != nil {
-		cal = c.Text
-	}
-	known, ok := months[cal]
-	if !ok { // an extension calendar: any tag may be a month
-		return true
-	}
-	for _, k := range known {
-		if k == m.Text {
-			return true
-		}
-	}
-	return false
-}
-
-// ParseDate reads a DateValue payload. Where the grammar allows two
-// readings (JULIAN 1700 is a calendar or a month) the rule's written
-// order decides: the calendar.
+// ParseDate reads a DateValue payload: the grammar's date_line, parsed as
+// the line "0 DATE <s>". Where the grammar allows two readings (JULIAN
+// 1700 is a calendar or a month) the first alternative wins: the calendar.
 func ParseDate(s string) (DateValue, error) {
-	n, err := Grammar().MatchWhere("DateValue", s, wellFormedDate)
+	if strings.ContainsAny(s, "\r\n") {
+		return DateValue{}, fmt.Errorf("gedcom7: date %q: line break", s)
+	}
+	line := "0 DATE"
+	if s != "" {
+		line += " " + s
+	}
+	// gotreesitter (v0.7.0) mis-parses input that ends right after a GLR
+	// fork; a trailing EOL avoids it.
+	src := []byte(line + "\n")
+	tree, lang, err := parse(src)
 	if err != nil {
 		return DateValue{}, fmt.Errorf("gedcom7: date %q: %w", s, err)
 	}
-	if len(n.Children) == 0 {
+	defer tree.Release()
+	root := tree.RootNode()
+	if e := firstError(root); e != nil {
+		return DateValue{}, fmt.Errorf("gedcom7: date %q: %w", s, errorAt(e, lang, 1))
+	}
+	dateLine := child(child(root, lang, "line"), lang, "date_line")
+	if dateLine == nil {
+		return DateValue{}, fmt.Errorf("gedcom7: date %q: not a DATE line", s)
+	}
+	value := child(dateLine, lang, "date_value")
+	if value == nil {
 		return DateValue{}, nil
 	}
-	c := n.Children[0]
-	dates := c.All("date")
-	switch c.Rule {
-	case "date":
-		return DateValue{Kind: DateKind, From: toDate(c)}, nil
-	case "dateApprox":
-		return DateValue{Kind: ApproximateKind, Qualifier: c.Text[:3], From: toDate(dates[0])}, nil
-	case "dateRange":
-		v := DateValue{Kind: RangeKind, Qualifier: c.Text[:3]}
-		switch v.Qualifier {
-		case "BET":
-			v.From, v.To = toDate(dates[0]), toDate(dates[1])
-		case "AFT":
-			v.From = toDate(dates[0])
-		case "BEF":
-			v.To = toDate(dates[0])
+	v := dateValue(value, src, lang)
+	for _, d := range []*Date{v.From, v.To} {
+		if d != nil && (d.Day < 0 || d.Day > 31 || (d.Day == 0 && child(value, lang, "day") != nil)) {
+			return DateValue{}, fmt.Errorf("gedcom7: date %q: day %d", s, d.Day)
 		}
-		return v, nil
-	case "DatePeriod":
-		v := DateValue{Kind: PeriodKind}
-		if strings.HasPrefix(c.Text, "TO") {
-			v.To = toDate(dates[0])
-		} else {
-			v.From = toDate(dates[0])
-			if len(dates) > 1 {
-				v.To = toDate(dates[1])
-			}
-		}
-		return v, nil
 	}
-	return DateValue{}, fmt.Errorf("gedcom7: date %q: unexpected rule %s", s, c.Rule)
+	return v, nil
 }
 
-func toDate(n *abnf.Node) *Date {
+// dateValue reads a date_value node.
+func dateValue(n *gotreesitter.Node, src []byte, lang *gotreesitter.Language) DateValue {
+	c := firstNamed(n)
+	dates := children(c, lang, "date")
+	text := c.Text(src)
+	switch c.Type(lang) {
+	case "date":
+		return DateValue{Kind: DateKind, From: toDate(c, src, lang)}
+	case "date_approx":
+		return DateValue{Kind: ApproximateKind, Qualifier: text[:3], From: toDate(dates[0], src, lang)}
+	case "date_range":
+		v := DateValue{Kind: RangeKind, Qualifier: text[:3]}
+		switch v.Qualifier {
+		case "BET":
+			v.From, v.To = toDate(dates[0], src, lang), toDate(dates[1], src, lang)
+		case "AFT":
+			v.From = toDate(dates[0], src, lang)
+		case "BEF":
+			v.To = toDate(dates[0], src, lang)
+		}
+		return v
+	case "date_period":
+		v := DateValue{Kind: PeriodKind}
+		if strings.HasPrefix(text, "TO") {
+			v.To = toDate(dates[0], src, lang)
+		} else {
+			v.From = toDate(dates[0], src, lang)
+			if len(dates) > 1 {
+				v.To = toDate(dates[1], src, lang)
+			}
+		}
+		return v
+	}
+	return DateValue{}
+}
+
+func toDate(n *gotreesitter.Node, src []byte, lang *gotreesitter.Language) *Date {
 	d := &Date{}
-	if c := n.Find("calendar"); c != nil {
-		d.Calendar = c.Text
+	if c := child(n, lang, "calendar"); c != nil {
+		d.Calendar = c.Text(src)
 	}
-	if c := n.Find("day"); c != nil {
-		d.Day, _ = strconv.Atoi(c.Text)
+	if c := child(n, lang, "day"); c != nil {
+		d.Day, _ = strconv.Atoi(c.Text(src))
 	}
-	if c := n.Find("month"); c != nil {
-		d.Month = c.Text
+	if c := child(n, lang, "month"); c != nil {
+		d.Month = c.Text(src)
 	}
-	if c := n.Find("year"); c != nil {
-		d.Year, _ = strconv.Atoi(c.Text)
+	if c := child(n, lang, "year"); c != nil {
+		d.Year, _ = strconv.Atoi(c.Text(src))
 	}
-	if c := n.Find("epoch"); c != nil {
-		d.Epoch = c.Text
+	if c := child(n, lang, "epoch"); c != nil {
+		d.Epoch = c.Text(src)
 	}
 	return d
 }

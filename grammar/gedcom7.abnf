@@ -1,0 +1,84 @@
+; @grammar "gedcom7"
+; @word "tag"
+; @extras ()
+; @conflicts (day year) (calendar month) (date)
+
+; GEDCOM 7 as a tree-sitter grammar, written from the specification's
+; extracted-files/grammar.abnf (gedcom7/grammar.abnf, pinned commit in
+; gedcom7/grammar.commit). Alternation is / because tree-sitter2abnf reads
+; only that form. Character classes are @pattern where the spec has %x
+; ranges. Whitespace is significant, so extras are empty and every space is
+; written.
+;
+; A line is typed by its tag: DATE, TIME, AGE, NAME, LATI and LONG carry
+; the data types the spec gives them; every other tag carries a pointer or
+; text. Nesting by level is done by the reader, not the grammar.
+
+; Lines are separated by EOL; the last may end without one, as the spec's
+; Line rule requires but every reader tolerates.
+document = [line *(_eol line)] [_eol]
+
+line = level %s" " [xref %s" "] _payload_line
+
+level = @pattern("0|[1-9][0-9]*")
+xref  = @token(%s"@" @pattern("[A-Z0-9_]+") %s"@")
+_eol  = %s"\n" / %s"\r\n" / %s"\r"
+
+_payload_line = date_line / time_line / age_line / name_line / lati_line / long_line / tag_line
+
+date_line = %s"DATE" [%s" " date_value]
+time_line = %s"TIME" %s" " time
+age_line  = %s"AGE" [%s" " age]
+name_line = %s"NAME" %s" " personal_name
+lati_line = %s"LATI" %s" " latitude
+long_line = %s"LONG" %s" " longitude
+tag_line  = tag [%s" " (pointer / text)]
+
+tag     = @pattern("[A-Z][A-Z0-9_]*|_[A-Z0-9_]+")
+ext_tag = @pattern("_[A-Z0-9_]+")
+pointer = xref / void
+void    = %s"@VOID@"
+text    = @pattern("(@@|[^@\\r\\n])[^\\r\\n]*")
+
+; ------------- DateValue -------------
+
+date_value  = date / date_period / date_range / date_approx
+date_period = %s"TO" %s" " date / %s"FROM" %s" " date [%s" " %s"TO" %s" " date]
+date_range  = %s"BET" %s" " date %s" " %s"AND" %s" " date / %s"AFT" %s" " date / %s"BEF" %s" " date
+date_approx = (%s"ABT" / %s"CAL" / %s"EST") %s" " date
+
+date     = [calendar %s" "] [[day %s" "] month %s" "] year [%s" " epoch]
+calendar = %s"GREGORIAN" / %s"JULIAN" / %s"FRENCH_R" / %s"HEBREW" / ext_tag
+day      = integer
+year     = integer
+month    = %s"JAN" / %s"FEB" / %s"MAR" / %s"APR" / %s"MAY" / %s"JUN" / %s"JUL" / %s"AUG" / %s"SEP" / %s"OCT" / %s"NOV" / %s"DEC" / %s"VEND" / %s"BRUM" / %s"FRIM" / %s"NIVO" / %s"PLUV" / %s"VENT" / %s"GERM" / %s"FLOR" / %s"PRAI" / %s"MESS" / %s"THER" / %s"FRUC" / %s"COMP" / %s"TSH" / %s"CSH" / %s"KSL" / %s"TVT" / %s"SHV" / %s"ADR" / %s"ADS" / %s"NSN" / %s"IYR" / %s"SVN" / %s"TMZ" / %s"AAV" / %s"ELL" / ext_tag
+epoch    = %s"BCE" / ext_tag
+integer  = @pattern("[0-9]+")
+
+; ------------- Time -------------
+
+time     = hour %s":" minute [%s":" second [%s"." fraction]] [%s"Z"]
+hour     = @pattern("[0-9]|[01][0-9]|2[0-3]")
+minute   = @pattern("[0-5][0-9]")
+second   = @pattern("[0-5][0-9]")
+fraction = @pattern("[0-9]+")
+
+; ------------- Age -------------
+
+age          = [age_bound %s" "] age_duration
+age_bound    = %s"<" / %s">"
+age_duration = years [%s" " months] [%s" " weeks] [%s" " days] / months [%s" " weeks] [%s" " days] / weeks [%s" " days] / days
+years        = @pattern("[0-9]+y")
+months       = @pattern("[0-9]+m")
+weeks        = @pattern("[0-9]+w")
+days         = @pattern("[0-9]+d")
+
+; ------------- PersonalName -------------
+
+personal_name = name_str / [name_str] %s"/" [name_str] %s"/" [name_str]
+name_str      = @pattern("[^/\\t\\r\\n]+")
+
+; ------------- Latitude, Longitude -------------
+
+latitude  = @pattern("[NS](90|[0-8]?[0-9])(\\.[0-9]+)?")
+longitude = @pattern("[EW](180|1[0-7][0-9]|[0-9]?[0-9])(\\.[0-9]+)?")

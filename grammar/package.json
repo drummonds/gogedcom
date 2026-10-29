@@ -1,0 +1,9 @@
+{
+  "name": "tree-sitter-gedcom7",
+  "version": "0.1.0",
+  "description": "Tree-sitter grammar for GEDCOM 7, from the specification's ABNF",
+  "license": "MIT",
+  "devDependencies": {
+    "tree-sitter-cli": "^0.27.1"
+  }
+}
