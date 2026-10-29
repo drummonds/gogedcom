@@ -1,14 +1,13 @@
 package gedcom7
 
 import (
-	"bytes"
 	"embed"
 	"fmt"
 	"io/fs"
 	"strings"
 	"sync"
 
-	"go.yaml.in/yaml/v3"
+	"github.com/goccy/go-yaml"
 )
 
 // The registry is the specification's extracted-files/tags, one YAML file
@@ -142,9 +141,6 @@ func readRegistry(files fs.FS, dir string) (*Registry, error) {
 		if err != nil {
 			return nil, err
 		}
-		// The files declare %YAML 1.2, which the parser refuses; they are
-		// plain YAML otherwise.
-		data = bytes.TrimPrefix(data, []byte("%YAML 1.2\n"))
 		var t term
 		if err := yaml.Unmarshal(data, &t); err != nil {
 			return nil, fmt.Errorf("%s: %w", e.Name(), err)

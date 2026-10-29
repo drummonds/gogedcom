@@ -87,7 +87,7 @@ said otherwise:
 | Choice | Taken | Alternative | Why |
 |---|---|---|---|
 | How the registry becomes Go | The YAML files embedded and read at first use | Go tables generated at build time from the TSVs, as the grammar is | Roadmap #4 defines extensions "in a YAML of the registry's shape", so a reader of that shape is needed anyway; one reader serves both. 321 small files read in milliseconds; generation stays open if that changes |
-| The `%YAML 1.2` directive | Stripped before the file is read | A parser that accepts it | Every Go YAML parser in use here (yaml.v3 and its go.yaml.in successors) refuses a document that declares 1.2; the files are plain YAML otherwise |
+| The YAML parser | goccy/go-yaml, a YAML 1.2 parser with no dependencies of its own | yaml.v3 or its go.yaml.in successors, which the other projects use | The files declare `%YAML 1.2` and the yaml.v3 family refuses that directive outright; reading them verbatim beats stripping a line first, and the registry's values hold nothing 1.1 and 1.2 read differently either way |
 | Which files | `tags/` only, verbatim, names as the spec gives them | Also the five TSVs | The README says the TSVs are look-ups derived from the YAML |
 | Typing a structure | By superstructure type and tag, walking from the document level | By tag alone | `DATE` is three types and `FAMC` two; the registry keys substructures by URI |
 | What an unknown structure costs | One violation; its subtree is skipped | Check the subtree against nothing | A cascade hides the cause |
