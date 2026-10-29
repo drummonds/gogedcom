@@ -7,17 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- `gedcom7/registry/`: the specification's registry (`extracted-files/tags`,
-  one YAML per term) vendored at the pinned commit by `task registry:fetch`
-  and embedded; `Standard()` reads it: `Structure`, `Substructure`,
-  `Enumeration`.
-- `gedcom7`: `(*Registry).Validate` reports every violation of the registry
-  with its line: a tag the registry does not place, a singleton repeated, a
-  required substructure missing, an enumeration payload not in its set.
-  `Structure.Line` is the file line a structure starts on.
-
 ## [0.1.0] - 2026-10-29
 
 ### Added
