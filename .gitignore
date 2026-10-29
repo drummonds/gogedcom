@@ -8,3 +8,4 @@ gogedcom
 grammar/node_modules
 grammar/src/tree_sitter
 grammar/src/node-types.json
+.vscode/
