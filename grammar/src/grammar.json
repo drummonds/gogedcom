@@ -424,11 +424,7 @@
                   "members": [
                     {
                       "type": "STRING",
-                      "value": " "
-                    },
-                    {
-                      "type": "STRING",
-                      "value": "TO"
+                      "value": " TO"
                     },
                     {
                       "type": "STRING",
@@ -469,11 +465,7 @@
             },
             {
               "type": "STRING",
-              "value": " "
-            },
-            {
-              "type": "STRING",
-              "value": "AND"
+              "value": " AND"
             },
             {
               "type": "STRING",
@@ -588,8 +580,13 @@
                       "type": "SEQ",
                       "members": [
                         {
-                          "type": "SYMBOL",
-                          "name": "day"
+                          "type": "ALIAS",
+                          "content": {
+                            "type": "SYMBOL",
+                            "name": "integer"
+                          },
+                          "value": "day",
+                          "named": true
                         },
                         {
                           "type": "STRING",
@@ -618,24 +615,20 @@
           ]
         },
         {
-          "type": "SYMBOL",
-          "name": "year"
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "integer"
+          },
+          "value": "year",
+          "named": true
         },
         {
           "type": "CHOICE",
           "members": [
             {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "STRING",
-                  "value": " "
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "epoch"
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "epoch"
             },
             {
               "type": "BLANK"
@@ -645,37 +638,33 @@
       ]
     },
     "calendar": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "GREGORIAN"
-        },
-        {
-          "type": "STRING",
-          "value": "JULIAN"
-        },
-        {
-          "type": "STRING",
-          "value": "FRENCH_R"
-        },
-        {
-          "type": "STRING",
-          "value": "HEBREW"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "ext_tag"
-        }
-      ]
-    },
-    "day": {
-      "type": "SYMBOL",
-      "name": "integer"
-    },
-    "year": {
-      "type": "SYMBOL",
-      "name": "integer"
+      "type": "PREC",
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "GREGORIAN"
+          },
+          {
+            "type": "STRING",
+            "value": "JULIAN"
+          },
+          {
+            "type": "STRING",
+            "value": "FRENCH_R"
+          },
+          {
+            "type": "STRING",
+            "value": "HEBREW"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "ext_tag"
+          }
+        ]
+      },
+      "value": 1
     },
     "month": {
       "type": "CHOICE",
@@ -839,17 +828,29 @@
       ]
     },
     "epoch": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "BCE"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "ext_tag"
-        }
-      ]
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": " "
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "BCE"
+              },
+              {
+                "type": "PATTERN",
+                "value": "_[A-Z0-9_]+"
+              }
+            ]
+          }
+        ]
+      }
     },
     "integer": {
       "type": "PATTERN",
@@ -1233,18 +1234,5 @@
       "type": "PATTERN",
       "value": "[EW](180|1[0-7][0-9]|[0-9]?[0-9])(\\.[0-9]+)?"
     }
-  },
-  "conflicts": [
-    [
-      "day",
-      "year"
-    ],
-    [
-      "calendar",
-      "month"
-    ],
-    [
-      "date"
-    ]
-  ]
+  }
 }

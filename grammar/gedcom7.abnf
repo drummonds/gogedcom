@@ -1,7 +1,6 @@
 ; @grammar "gedcom7"
 ; @word "tag"
 ; @extras ()
-; @conflicts (day year) (calendar month) (date)
 
 ; GEDCOM 7 as a tree-sitter grammar, written from the specification's
 ; extracted-files/grammar.abnf (gedcom7/grammar.abnf, pinned commit in
@@ -9,6 +8,12 @@
 ; only that form. Character classes are @pattern where the spec has %x
 ; ranges. Whitespace is significant, so extras are empty and every space is
 ; written.
+;
+; The grammar is LR(1) and declares no conflicts, so tree-sitter generate
+; rejects any ambiguity. Where the single-space delimiter would need two
+; tokens of lookahead the space is folded into the following token (" TO",
+; " AND", epoch), and day and year are aliases of integer so the parser
+; decides which it has from the token after the space.
 ;
 ; A line is typed by its tag: DATE, TIME, AGE, NAME, LATI and LONG carry
 ; the data types the spec gives them; every other tag carries a pointer or
@@ -43,16 +48,14 @@ text    = @pattern("(@@|[^@\\r\\n])[^\\r\\n]*")
 ; ------------- DateValue -------------
 
 date_value  = date / date_period / date_range / date_approx
-date_period = %s"TO" %s" " date / %s"FROM" %s" " date [%s" " %s"TO" %s" " date]
-date_range  = %s"BET" %s" " date %s" " %s"AND" %s" " date / %s"AFT" %s" " date / %s"BEF" %s" " date
+date_period = %s"TO" %s" " date / %s"FROM" %s" " date [%s" TO" %s" " date]
+date_range  = %s"BET" %s" " date %s" AND" %s" " date / %s"AFT" %s" " date / %s"BEF" %s" " date
 date_approx = (%s"ABT" / %s"CAL" / %s"EST") %s" " date
 
-date     = [calendar %s" "] [[day %s" "] month %s" "] year [%s" " epoch]
-calendar = %s"GREGORIAN" / %s"JULIAN" / %s"FRENCH_R" / %s"HEBREW" / ext_tag
-day      = integer
-year     = integer
+date     = [calendar %s" "] [[@alias(~day) integer %s" "] month %s" "] @alias(~year) integer [epoch]
+calendar = @prec(1) (%s"GREGORIAN" / %s"JULIAN" / %s"FRENCH_R" / %s"HEBREW" / ext_tag)
 month    = %s"JAN" / %s"FEB" / %s"MAR" / %s"APR" / %s"MAY" / %s"JUN" / %s"JUL" / %s"AUG" / %s"SEP" / %s"OCT" / %s"NOV" / %s"DEC" / %s"VEND" / %s"BRUM" / %s"FRIM" / %s"NIVO" / %s"PLUV" / %s"VENT" / %s"GERM" / %s"FLOR" / %s"PRAI" / %s"MESS" / %s"THER" / %s"FRUC" / %s"COMP" / %s"TSH" / %s"CSH" / %s"KSL" / %s"TVT" / %s"SHV" / %s"ADR" / %s"ADS" / %s"NSN" / %s"IYR" / %s"SVN" / %s"TMZ" / %s"AAV" / %s"ELL" / ext_tag
-epoch    = %s"BCE" / ext_tag
+epoch    = @token(%s" " (%s"BCE" / @pattern("_[A-Z0-9_]+")))
 integer  = @pattern("[0-9]+")
 
 ; ------------- Time -------------
