@@ -56,8 +56,8 @@ registry are in the module.
 
 ## Licence
 
-MIT. The vendored GEDCOM 7 grammar is Apache 2.0, FamilySearch
-(`gedcom7/LICENSE.gedcom`).
+MIT. The vendored GEDCOM 7 grammar, registry and test files are Apache
+2.0, FamilySearch (`gedcom7/LICENSE.gedcom`).
 
 ## Links
 
