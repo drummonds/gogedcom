@@ -1,0 +1,116 @@
+; @grammar "gedcom551"
+; @extras ()
+
+; GEDCOM 5.5.1 as a tree-sitter grammar, written from the specification
+; (gedcom.io/specifications/ged551.pdf): the line syntax of chapter 1 and
+; the primitive data types of chapter 2. Alternation is / because
+; tree-sitter2abnf reads only that form. Whitespace is significant, so
+; extras are empty and every space is written.
+;
+; The grammar has two entries. A line, as the file holds it, types nothing:
+; its value is a pointer or text. A typed value is a data type introduced
+; by the tag that carries it (DATE, TIME, AGE, NAME, LATI, LONG), which is
+; how a payload is parsed on its own once the reader has the tree. The
+; file is the contract, so a payload its data type rejects is still read;
+; see docs/stories/007.
+;
+; The grammar is LR(1) and declares no conflicts. Where the single-space
+; delimiter would need two tokens of lookahead the space is folded into the
+; following token (" TO", " AND", the epoch, the date phrase), and day and
+; year are aliases of integer, as in the 7 grammar.
+;
+; Relaxations of the specification, each a corpus test, are marked RELAXED.
+
+; A file is lines separated by terminators, the last terminator optional.
+document = [line *(_eol line)] [_eol] / _value [_eol]
+
+; ------------- Chapter 1: the line -------------
+
+; gedcom_line := level delim [xref_ID delim] tag [delim line_value] terminator
+line = level %s" " [xref %s" "] tag [%s" " (pointer / text)]
+
+; terminator := CR | LF | CR LF | LF CR
+_eol = %s"\n" / %s"\r\n" / %s"\r" / %s"\n\r"
+
+; level := digit | digit digit, no leading zero
+level = @pattern("0|[1-9][0-9]?")
+
+; pointer := @ alphanum pointer_string @; pointer_char is any non_at, so a
+; cross-reference identifier may hold spaces, ! and :.
+xref    = @token(%s"@" @pattern("[A-Za-z0-9_][^@\\r\\n]*") %s"@")
+pointer = xref
+
+; tag := alphanum | tag alphanum; alpha includes the underscore and lower case.
+tag = @pattern("[A-Za-z0-9_]+")
+
+; line_item := any_char | escape | ... where any_char is a printable
+; character, space, # or @@, and escape is @#...@.
+; RELAXED: any character but CR and LF, so a tab, a control character and
+; a lone @ are text, as exports write them. A value that is exactly an
+; xref is a pointer; an xref followed by more text is text.
+text = @pattern("(@@|[^@\\r\\n])[^\\r\\n]*|@[^@\\r\\n]*(@[^\\r\\n]+)?")
+
+; ------------- Chapter 2: the typed values -------------
+
+_value = date_line / time_line / age_line / name_line / lati_line / long_line
+
+date_line = %s"DATE" [%s" " date_value]
+time_line = %s"TIME" %s" " time_value
+age_line  = %s"AGE" %s" " age_at_event
+name_line = %s"NAME" %s" " name_personal
+lati_line = %s"LATI" %s" " place_latitude
+long_line = %s"LONG" %s" " place_longitude
+
+; ------------- DATE_VALUE -------------
+
+; DATE_VALUE := DATE | DATE_PERIOD | DATE_RANGE | DATE_APPROXIMATED
+;             | INT DATE (DATE_PHRASE) | (DATE_PHRASE)
+date_value  = date / date_period / date_range / date_approx / date_interp / date_phrase
+date_period = %s"TO" %s" " date / %s"FROM" %s" " date [%s" TO" %s" " date]
+date_range  = %s"BET" %s" " date %s" AND" %s" " date / %s"AFT" %s" " date / %s"BEF" %s" " date
+date_approx = (%s"ABT" / %s"CAL" / %s"EST") %s" " date
+date_interp = %s"INT" %s" " date date_phrase
+; DATE_PHRASE := TEXT in parentheses; the token carries its leading
+; delimiter when it follows a date.
+date_phrase = @pattern(" ?\\([^\\r\\n]*\\)")
+
+; DATE := [DATE_CALENDAR_ESCAPE] DATE_CALENDAR, each calendar's date being
+; [[DAY] MONTH] YEAR [B.C.]; YEAR_GREG may carry a dual-year modifier (1699/00).
+date     = [calendar %s" "] [[@alias(~day) integer %s" "] month %s" "] @alias(~year) integer [epoch]
+calendar = @token(%s"@#D" @pattern("[A-Z][A-Z ]*") %s"@")
+month    = %s"JAN" / %s"FEB" / %s"MAR" / %s"APR" / %s"MAY" / %s"JUN" / %s"JUL" / %s"AUG" / %s"SEP" / %s"OCT" / %s"NOV" / %s"DEC" / %s"VEND" / %s"BRUM" / %s"FRIM" / %s"NIVO" / %s"PLUV" / %s"VENT" / %s"GERM" / %s"FLOR" / %s"PRAI" / %s"MESS" / %s"THER" / %s"FRUC" / %s"COMP" / %s"TSH" / %s"CSH" / %s"KSL" / %s"TVT" / %s"SHV" / %s"ADR" / %s"ADS" / %s"NSN" / %s"IYR" / %s"SVN" / %s"TMZ" / %s"AAV" / %s"ELL"
+epoch    = @token(%s" " %s"B.C.")
+integer  = @pattern("[0-9]+(/[0-9][0-9])?")
+
+; ------------- TIME_VALUE -------------
+
+; TIME_VALUE := hh:mm:ss.fs, seconds and fraction optional
+time_value = hour %s":" minute [%s":" second [%s"." fraction]]
+hour       = @pattern("[0-9]|[01][0-9]|2[0-3]")
+minute     = @pattern("[0-5][0-9]")
+second     = @pattern("[0-5][0-9]")
+fraction   = @pattern("[0-9]+")
+
+; ------------- AGE_AT_EVENT -------------
+
+; AGE_AT_EVENT := [< | >] (YYy [MMm] [DDDd] | MMm [DDDd] | DDDd | CHILD | INFANT | STILLBORN)
+; RELAXED: a space may follow the bound.
+age_at_event = [age_bound [%s" "]] age_duration
+age_bound    = %s"<" / %s">"
+age_duration = years [%s" " months] [%s" " days] / months [%s" " days] / days / %s"CHILD" / %s"INFANT" / %s"STILLBORN"
+years        = @pattern("[0-9]+y")
+months       = @pattern("[0-9]+m")
+days         = @pattern("[0-9]+d")
+
+; ------------- NAME_PERSONAL -------------
+
+; NAME_PERSONAL := NAME_TEXT | /NAME_TEXT/ | NAME_TEXT /NAME_TEXT/
+;                | /NAME_TEXT/ NAME_TEXT | NAME_TEXT /NAME_TEXT/ NAME_TEXT
+name_personal = name_text / [name_text] %s"/" [name_text] %s"/" [name_text]
+name_text     = @pattern("[^/\\r\\n]+")
+
+; ------------- PLACE_LATITUDE, PLACE_LONGITUDE -------------
+
+; N18.150944, E168.150944: a hemisphere letter and decimal degrees
+place_latitude  = @pattern("[NS][0-9]+(\\.[0-9]+)?")
+place_longitude = @pattern("[EW][0-9]+(\\.[0-9]+)?")

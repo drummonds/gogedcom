@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"git.bytestone.uk/hum3/gotreesitter"
+
+	"git.bytestone.uk/hum3/gogedcom/internal/tstree"
 )
 
 // payload is a data type's text parsed as the payload of a level-0 line,
@@ -36,11 +38,11 @@ func parsePayload(what, tag, s string) (*payload, error) {
 		return nil, fmt.Errorf("gedcom7: %s %q: %w", what, s, err)
 	}
 	root := tree.RootNode()
-	if err := parseError(root, lang, 1); err != nil {
+	if err := tstree.ParseError(root, lang, 1); err != nil {
 		tree.Release()
 		return nil, fmt.Errorf("gedcom7: %s %q: %w", what, s, err)
 	}
-	typed := child(child(root, lang, "line"), lang, strings.ToLower(tag)+"_line")
+	typed := tstree.Child(tstree.Child(root, lang, "line"), lang, strings.ToLower(tag)+"_line")
 	if typed == nil {
 		tree.Release()
 		return nil, fmt.Errorf("gedcom7: %s %q: not a %s line", what, s, tag)
@@ -51,14 +53,14 @@ func parsePayload(what, tag, s string) (*payload, error) {
 func (p *payload) release() { p.tree.Release() }
 
 // value is the typed line's value node, or nil when the payload is empty.
-func (p *payload) value(typ string) *gotreesitter.Node { return child(p.line, p.lang, typ) }
+func (p *payload) value(typ string) *gotreesitter.Node { return tstree.Child(p.line, p.lang, typ) }
 
 // text is the source text of n.
 func (p *payload) text(n *gotreesitter.Node) string { return n.Text(p.src) }
 
 // childText is the text of n's first child of the type, or "".
 func (p *payload) childText(n *gotreesitter.Node, typ string) string {
-	if c := child(n, p.lang, typ); c != nil {
+	if c := tstree.Child(n, p.lang, typ); c != nil {
 		return p.text(c)
 	}
 	return ""

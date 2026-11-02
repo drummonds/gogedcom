@@ -1,6 +1,6 @@
 # 007 — The 5.5.1 grammar from its specification, and the reader on the 7 reader's tree (#24)
 
-**Status:** proposed
+**Status:** in progress
 **Roadmap:** #5 — a 5.5.1 ABNF in house style and the reader on the same structure as the 7 reader
 
 ## Why
@@ -148,7 +148,7 @@ longitude.
 
 ## Done when
 
-- [ ] tests express the acceptance tables and pass; `task grammar:test GRAMMAR=gedcom551` passes
-- [ ] README status, vocabulary, packages, toolchain
-- [ ] changelog fragment
+- [x] tests express the acceptance tables and pass; `task grammar:test GRAMMAR=gedcom551` passes
+- [x] README status, vocabulary, packages, toolchain
+- [x] changelog fragment
 - [ ] issue closed with a link to the release

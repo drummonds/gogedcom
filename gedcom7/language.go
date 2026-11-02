@@ -11,9 +11,9 @@ import (
 )
 
 // The parse tables come from the tree-sitter chain, task grammar:generate:
-// grammar/gedcom7.abnf -> tree-sitter2abnf -> grammar/src/grammar.json ->
-// tree-sitter generate -> grammar/src/parser.c -> ts2go -> grammar_gen.go
-// and grammar_blobs/gedcom7.bin. The blob is what gotreesitter's own
+// grammar/gedcom7/gedcom7.abnf -> tree-sitter2abnf -> src/grammar.json ->
+// tree-sitter generate -> src/parser.c -> ts2go -> grammar_gen.go and
+// grammar_blobs/gedcom7.bin. The blob is what gotreesitter's own
 // registry holds for its languages: a gzip of the gob-encoded Language.
 
 //go:embed grammar_blobs/*.bin

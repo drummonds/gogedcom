@@ -4,14 +4,21 @@
       "name": "gedcom7",
       "camelcase": "Gedcom7",
       "scope": "source.gedcom7",
-      "path": ".",
+      "path": "gedcom7",
+      "file-types": ["ged"]
+    },
+    {
+      "name": "gedcom551",
+      "camelcase": "Gedcom551",
+      "scope": "source.gedcom551",
+      "path": "gedcom551",
       "file-types": ["ged"]
     }
   ],
   "metadata": {
     "version": "0.1.0",
     "license": "MIT",
-    "description": "Tree-sitter grammar for GEDCOM 7, from the specification's ABNF",
+    "description": "Tree-sitter grammars for GEDCOM 7 (from the specification's ABNF) and GEDCOM 5.5.1 (from its specification)",
     "links": { "repository": "https://git.bytestone.uk/hum3/gogedcom" }
   },
   "bindings": { "c": false, "go": false, "node": false, "python": false, "rust": false, "swift": false }

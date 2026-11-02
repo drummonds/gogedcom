@@ -54,20 +54,24 @@ tasks:
       - for f in {{.GEDCOMIO_TESTFILES}}; do curl -sSfL -o gedcom7/testdata/gedcom70/$f.ged https://raw.githubusercontent.com/FamilySearch/GEDCOM.io/{{.GEDCOMIO_COMMIT}}/testfiles/gedcom70/$f.ged; done
 
   grammar:generate:
-    desc: 'The tree-sitter chain: grammar/gedcom7.abnf -> grammar.json -> parser.c -> gedcom7/grammar_blobs/gedcom7.bin'
-    dir: grammar
+    desc: 'The tree-sitter chain for one grammar (GRAMMAR=gedcom7|gedcom551): grammar/G/G.abnf -> grammar.json -> parser.c -> G/grammar_blobs/G.bin'
+    vars:
+      GRAMMAR: '{{.GRAMMAR | default "gedcom7"}}'
+    dir: grammar/{{.GRAMMAR}}
     preconditions:
       - sh: which tree-sitter2abnf
         msg: "tree-sitter2abnf not found: go install git.bytestone.uk/hum3/tree-sitter2abnf/cmd/tree-sitter2abnf@latest"
     cmds:
-      - tree-sitter2abnf -o src/grammar.json gedcom7.abnf
-      - npx tree-sitter-cli generate src/grammar.json
-      - go run git.bytestone.uk/hum3/gotreesitter/cmd/ts2go -input src/parser.c -output ../gedcom7/grammar_gen.go -package gedcom7 -name gedcom7
+      - tree-sitter2abnf -o src/grammar.json {{.GRAMMAR}}.abnf
+      - npx --prefix .. tree-sitter-cli generate src/grammar.json
+      - go run git.bytestone.uk/hum3/gotreesitter/cmd/ts2go -input src/parser.c -output ../../{{.GRAMMAR}}/grammar_gen.go -package {{.GRAMMAR}} -name {{.GRAMMAR}}
   grammar:test:
-    desc: Run the tree-sitter corpus under grammar/test/corpus (needs a C compiler)
-    dir: grammar
+    desc: Run the tree-sitter corpus of one grammar (GRAMMAR=gedcom7|gedcom551) under grammar/G/test/corpus (needs a C compiler)
+    vars:
+      GRAMMAR: '{{.GRAMMAR | default "gedcom7"}}'
+    dir: grammar/{{.GRAMMAR}}
     cmds:
-      - npx tree-sitter-cli test
+      - npx --prefix .. tree-sitter-cli test
 
   docs:build:
     desc: Render the docs into docs/ (landing page, stories, diagrams)
@@ -79,4 +83,4 @@ tasks:
   clean:
     desc: Remove build output
     cmds:
-      - rm -rf docs/*.html docs/*.svg docs/stories/*.html gogedcom grammar/src/tree_sitter grammar/node_modules
+      - rm -rf docs/*.html docs/*.svg docs/stories/*.html gogedcom grammar/*/src/tree_sitter grammar/node_modules

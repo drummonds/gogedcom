@@ -3,6 +3,8 @@ package gedcom7
 import (
 	"strconv"
 	"strings"
+
+	"git.bytestone.uk/hum3/gogedcom/internal/tstree"
 )
 
 // Age is the spec's Age rule: [bound] years months weeks days, each unit
@@ -49,7 +51,7 @@ func ParseAge(s string) (Age, error) {
 		return Age{}, nil
 	}
 	a := Age{Bound: p.childText(n, "age_bound")}
-	d := child(n, p.lang, "age_duration")
+	d := tstree.Child(n, p.lang, "age_duration")
 	for _, u := range []struct {
 		typ string
 		dst *int

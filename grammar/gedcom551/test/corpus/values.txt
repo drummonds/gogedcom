@@ -1,0 +1,111 @@
+================
+Time with seconds, without, with a fraction
+================
+TIME 05:15:00
+----
+(document (time_line (time_value (hour) (minute) (second))))
+
+================
+Time without seconds
+================
+TIME 5:15
+----
+(document (time_line (time_value (hour) (minute))))
+
+================
+Time with a fraction
+================
+TIME 12:30:05.5
+----
+(document (time_line (time_value (hour) (minute) (second) (fraction))))
+
+================
+Age in years, months and days
+================
+AGE 4y 8m 10d
+----
+(document (age_line (age_at_event (age_duration (years) (months) (days)))))
+
+================
+Age with a bound
+================
+AGE <18y
+----
+(document (age_line (age_at_event (age_bound) (age_duration (years)))))
+
+================
+RELAXED age: a space after the bound
+================
+AGE > 1m 3d
+----
+(document (age_line (age_at_event (age_bound) (age_duration (months) (days)))))
+
+================
+Age as a word
+================
+AGE CHILD
+----
+(document (age_line (age_at_event (age_duration))))
+
+================
+Name with surname
+================
+NAME Humphrey John Jardine /Drummond/
+----
+(document (name_line (name_personal (name_text) (name_text))))
+
+================
+Surname only
+================
+NAME /Drummond/
+----
+(document (name_line (name_personal (name_text))))
+
+================
+Name without surname
+================
+NAME Zara
+----
+(document (name_line (name_personal (name_text))))
+
+================
+Surname first
+================
+NAME /Drummond/ Zara
+----
+(document (name_line (name_personal (name_text) (name_text))))
+
+================
+Name with suffix
+================
+NAME Jean /Drummond/ 16th Baroness
+----
+(document (name_line (name_personal (name_text) (name_text) (name_text))))
+
+================
+One slash is an error
+================
+NAME Louise/Louisa
+----
+(document (name_line (name_personal (name_text) (name_text) (MISSING "/"))))
+
+================
+Latitude and longitude
+================
+LATI N51.5
+----
+(document (lati_line (place_latitude)))
+
+================
+Longitude
+================
+LONG W1.5
+----
+(document (long_line (place_longitude)))
+
+================
+A latitude as a longitude is an error
+================
+LONG N1.5
+----
+(document (ERROR (place_latitude)))
