@@ -11,11 +11,20 @@ tree-sitter generate → ts2go → a gotreesitter blob embedded in `gedcom7`.
 
 ## Status
 
-Stories 001 to 005: the grammar, the six GEDCOM 7 data types (`DateValue`,
-`Time`, `Age`, `PersonalName`, `Latitude`, `Longitude`) typed, a file read
-as a tree of structures, the registry validating it (which structures go
-where, cardinality, enumerations), and the tree written back as a file
-that reads to the same tree. See [ROADMAP.md](ROADMAP.md).
+GEDCOM 7 is read as a tree of structures, validated against the
+specification's registry, and written back to a file that reads to the
+same tree; the six data types are typed. Nothing reads or writes 5.5.1
+yet.
+
+The finish line for 5.5.1 is one file: the author's own tree exported from
+Geni.com as GEDCOM 5.5.1 (60,126 lines; 1,976 `INDI`, 722 `FAM`; the
+extension tags `_MARNM` and `_PRIM`; `ADDR` placed where 5.5.1 does not
+allow it). 5.5.1 is done when that file goes 5.5.1 → 7 → 5.5.1 and comes
+back equal to the original: the same trees after `CONC` and `CONT` are
+folded, the header's provenance aside. The file names living people and
+is not in the repo. See [ROADMAP.md](ROADMAP.md) and
+[story 006](docs/stories/006-readme-status-and-the-roadmap-the-geni-round-trip.md)
+for the comparison rules.
 
 ## Vocabulary
 
@@ -37,7 +46,7 @@ GEDCOM 7's own words, used in code, tests and docs.
 | Violation | A structure that breaks the registry, reported with its line by `Validate` |
 | Line break in a payload | A `\n` in `Payload`; in the file it is a `CONT` line one level deeper, folded by `Read`, split by `Write` |
 | At-sign escape | A text payload whose value begins with `@` is written `@@…`; `Read` strips it, `Write` adds it; a pointer is never escaped |
-| Round trip | `Read(Write(doc))` equals `doc` in every field but `Line` |
+| Round trip | `Read(Write(doc))` equals `doc` in every field but `Line`; for 5.5.1, the Geni export back from 7 equal to the original (story 006) |
 
 ## Packages
 
