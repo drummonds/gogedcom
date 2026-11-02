@@ -176,7 +176,9 @@ func toDate(n *gotreesitter.Node, src []byte, lang *gotreesitter.Language) *Date
 		d.Year, _ = strconv.Atoi(c.Text(src))
 	}
 	if c := child(n, lang, "epoch"); c != nil {
-		d.Epoch = c.Text(src)
+		// The epoch token carries its leading delimiter so the grammar stays
+		// LR(1); the delimiter is not part of the epoch.
+		d.Epoch = strings.TrimPrefix(c.Text(src), " ")
 	}
 	return d
 }
