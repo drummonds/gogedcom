@@ -1,0 +1,85 @@
+================
+Header, record, pointer, trailer
+================
+0 HEAD
+1 SOUR Geni.com
+2 VERS 1.0
+0 @I6000000000564618107@ INDI
+1 NAME Humphrey John Jardine /Drummond/
+1 FAMC @F6000000000587121816@
+0 TRLR
+----
+(document
+  (line (level) (tag))
+  (line (level) (tag) (text))
+  (line (level) (tag) (text))
+  (line (level) (xref) (tag))
+  (line (level) (tag) (text))
+  (line (level) (tag) (pointer (xref)))
+  (line (level) (tag)))
+
+================
+A line types nothing: a DATE or NAME its data type rejects is text
+================
+2 DATE 5  1801
+1 NAME Louise/Louisa
+----
+(document
+  (line (level) (tag) (text))
+  (line (level) (tag) (text)))
+
+================
+Two-digit level, lower-case tag, cross-reference identifier with space, bang and colon
+================
+10 X
+1 Note lower
+0 @I 1!2:a@ INDI
+----
+(document
+  (line (level) (tag))
+  (line (level) (tag) (text))
+  (line (level) (xref) (tag)))
+
+================
+RELAXED text: a lone at sign, an xref followed by text, a tab, a leading space, a trailing space
+================
+1 ADDR humphrey.drummond@gmail.com
+2 CONT @R1203558009@  Ancestry Family Trees
+1 NOTE a	tab
+2 CONC  He was awarded the Military Cross 
+1 NOTE mail @@home
+----
+(document
+  (line (level) (tag) (text))
+  (line (level) (tag) (text))
+  (line (level) (tag) (text))
+  (line (level) (tag) (text))
+  (line (level) (tag) (text)))
+
+================
+Two spaces after the level are an error
+================
+1  NAME x
+----
+(document (line (level) (ERROR) (tag) (text)))
+
+================
+A leading zero on the level is an error
+================
+01 NAME x
+----
+(document (ERROR (level)) (line (level) (tag) (text)))
+
+================
+A delimiter with no value after it is an error
+================
+1 OCCU 
+----
+(document (line (level) (tag)) (ERROR))
+
+================
+A typed value without its tag is not a line
+================
+NOTE x
+----
+(document (ERROR (tag) (tag)))

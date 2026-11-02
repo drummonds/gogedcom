@@ -7,7 +7,7 @@ gogedcom
 .tp-release-inflight
 .tp-release.yml
 grammar/node_modules
-grammar/src/tree_sitter
-grammar/src/node-types.json
+grammar/*/src/tree_sitter
+grammar/*/src/node-types.json
 .vscode/
 .task/

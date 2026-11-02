@@ -1,0 +1,132 @@
+================
+Day month year
+================
+DATE 11 MAR 1961
+----
+(document (date_line (date_value (date (day) (month) (year)))))
+
+================
+Month year
+================
+DATE MAR 1961
+----
+(document (date_line (date_value (date (month) (year)))))
+
+================
+Year only
+================
+DATE 1961
+----
+(document (date_line (date_value (date (year)))))
+
+================
+Calendar escape, Julian
+================
+DATE @#DJULIAN@ 1 JAN 1700
+----
+(document (date_line (date_value (date (calendar) (day) (month) (year)))))
+
+================
+Calendar escape with a space, French Republican month
+================
+DATE @#DFRENCH R@ 1 VEND 8
+----
+(document (date_line (date_value (date (calendar) (day) (month) (year)))))
+
+================
+Hebrew month
+================
+DATE @#DHEBREW@ 1 TSH 5700
+----
+(document (date_line (date_value (date (calendar) (day) (month) (year)))))
+
+================
+B.C.
+================
+DATE 100 B.C.
+----
+(document (date_line (date_value (date (year) (epoch)))))
+
+================
+Dual year
+================
+DATE 15 APR 1699/00
+----
+(document (date_line (date_value (date (day) (month) (year)))))
+
+================
+About, calculated, estimated
+================
+DATE ABT 1850
+----
+(document (date_line (date_value (date_approx (date (year))))))
+
+================
+Between
+================
+DATE BET 1850 AND 1860
+----
+(document (date_line (date_value (date_range (date (year)) (date (year))))))
+
+================
+After, before
+================
+DATE AFT 1850
+----
+(document (date_line (date_value (date_range (date (year))))))
+
+================
+Period from, to
+================
+DATE FROM 1850 TO 1860
+----
+(document (date_line (date_value (date_period (date (year)) (date (year))))))
+
+================
+Period with one bound
+================
+DATE TO 1860
+----
+(document (date_line (date_value (date_period (date (year))))))
+
+================
+Interpreted date with phrase
+================
+DATE INT 1850 (about the war)
+----
+(document (date_line (date_value (date_interp (date (year)) (date_phrase)))))
+
+================
+Phrase only
+================
+DATE (spring 1850)
+----
+(document (date_line (date_value (date_phrase))))
+
+================
+Empty date
+================
+DATE
+----
+(document (date_line))
+
+================
+Two spaces between day and year are an error
+================
+DATE 5  1801
+----
+(document (date_line (date_value (date (day) (month (MISSING "JAN")) (year)))))
+
+================
+Day and month without a year are an error
+================
+DATE 12 JAN
+----
+(document (date_line (date_value (date (year)))) (ERROR (month)))
+
+================
+BCE is not an epoch
+================
+DATE 1850 B.C.E.
+----
+(document (date_line (date_value (date (year) (epoch)))) (ERROR (tag)))

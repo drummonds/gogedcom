@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"git.bytestone.uk/hum3/gotreesitter"
+
+	"git.bytestone.uk/hum3/gogedcom/internal/tstree"
 )
 
 // Kind is which of the DateValue rule's alternatives a value is.
@@ -118,7 +120,7 @@ func ParseDate(s string) (DateValue, error) {
 	}
 	v := dateValue(value, p.src, p.lang)
 	for _, d := range []*Date{v.From, v.To} {
-		if d != nil && (d.Day < 0 || d.Day > 31 || (d.Day == 0 && child(value, p.lang, "day") != nil)) {
+		if d != nil && (d.Day < 0 || d.Day > 31 || (d.Day == 0 && tstree.Child(value, p.lang, "day") != nil)) {
 			return DateValue{}, fmt.Errorf("gedcom7: date %q: day %d", s, d.Day)
 		}
 	}
@@ -127,8 +129,8 @@ func ParseDate(s string) (DateValue, error) {
 
 // dateValue reads a date_value node.
 func dateValue(n *gotreesitter.Node, src []byte, lang *gotreesitter.Language) DateValue {
-	c := firstNamed(n)
-	dates := children(c, lang, "date")
+	c := tstree.FirstNamed(n)
+	dates := tstree.Children(c, lang, "date")
 	text := c.Text(src)
 	switch c.Type(lang) {
 	case "date":
@@ -163,19 +165,19 @@ func dateValue(n *gotreesitter.Node, src []byte, lang *gotreesitter.Language) Da
 
 func toDate(n *gotreesitter.Node, src []byte, lang *gotreesitter.Language) *Date {
 	d := &Date{}
-	if c := child(n, lang, "calendar"); c != nil {
+	if c := tstree.Child(n, lang, "calendar"); c != nil {
 		d.Calendar = c.Text(src)
 	}
-	if c := child(n, lang, "day"); c != nil {
+	if c := tstree.Child(n, lang, "day"); c != nil {
 		d.Day, _ = strconv.Atoi(c.Text(src))
 	}
-	if c := child(n, lang, "month"); c != nil {
+	if c := tstree.Child(n, lang, "month"); c != nil {
 		d.Month = c.Text(src)
 	}
-	if c := child(n, lang, "year"); c != nil {
+	if c := tstree.Child(n, lang, "year"); c != nil {
 		d.Year, _ = strconv.Atoi(c.Text(src))
 	}
-	if c := child(n, lang, "epoch"); c != nil {
+	if c := tstree.Child(n, lang, "epoch"); c != nil {
 		// The epoch token carries its leading delimiter so the grammar stays
 		// LR(1); the delimiter is not part of the epoch.
 		d.Epoch = strings.TrimPrefix(c.Text(src), " ")

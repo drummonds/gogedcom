@@ -8,45 +8,16 @@ import (
 	"strings"
 
 	"git.bytestone.uk/hum3/gotreesitter"
+
+	"git.bytestone.uk/hum3/gogedcom/gedcom"
+	"git.bytestone.uk/hum3/gogedcom/internal/tstree"
 )
 
-// Structure is a line with its substructures: the lines one level deeper
-// that follow it. CONT lines are folded into the payload.
-type Structure struct {
-	Line          int    // the file line it starts on, from 1
-	XRef          string // "@I1@" on a record, else ""
-	Tag           string
-	Payload       string
-	Substructures []*Structure
-}
-
-// Find is the first substructure with the tag, or nil.
-func (s *Structure) Find(tag string) *Structure {
-	for _, c := range s.Substructures {
-		if c.Tag == tag {
-			return c
-		}
-	}
-	return nil
-}
-
-// All is every substructure with the tag, in order.
-func (s *Structure) All(tag string) []*Structure {
-	var out []*Structure
-	for _, c := range s.Substructures {
-		if c.Tag == tag {
-			out = append(out, c)
-		}
-	}
-	return out
-}
-
-// Document is a file: the header and the records between it and the
-// trailer.
-type Document struct {
-	Header  *Structure
-	Records []*Structure
-}
+// Structure, Document: the tree both readers return, in package gedcom.
+type (
+	Structure = gedcom.Structure
+	Document  = gedcom.Document
+)
 
 // Read reads a file with the grammar. A leading byte order mark is
 // accepted; the grammar accepts CR, LF and CR LF line ends. The first line
@@ -146,16 +117,16 @@ func parseLine(parser *gotreesitter.Parser, lang *gotreesitter.Language, line []
 	}
 	defer tree.Release()
 	root := tree.RootNode()
-	if err := parseError(root, lang, lineNo); err != nil {
+	if err := tstree.ParseError(root, lang, lineNo); err != nil {
 		return nil, 0, fmt.Errorf("gedcom7: %w", err)
 	}
-	l := child(root, lang, "line")
+	l := tstree.Child(root, lang, "line")
 	if l == nil {
 		return nil, 0, fmt.Errorf("gedcom7: line %d: not a line", lineNo)
 	}
-	level, _ := strconv.Atoi(child(l, lang, "level").Text(src))
+	level, _ := strconv.Atoi(tstree.Child(l, lang, "level").Text(src))
 	s := &Structure{Line: lineNo}
-	if x := child(l, lang, "xref"); x != nil {
+	if x := tstree.Child(l, lang, "xref"); x != nil {
 		s.XRef = x.Text(src)
 	}
 	// The payload line is the last named child: tag_line or a typed

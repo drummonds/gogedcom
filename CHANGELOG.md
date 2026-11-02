@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-02
+
+- `gedcom551`: GEDCOM 5.5.1 read into the same tree as GEDCOM 7. The grammar (`grammar/gedcom551/gedcom551.abnf`) is written from the 5.5.1 specification's line syntax and primitive data types; a line types nothing, so a payload its data type rejects is still read, and `CONC`/`CONT` are folded. `ParseDate` reads a `DATE_VALUE` with the calendar escape, `B.C.`, the dual year, `INT … (phrase)` and `(phrase)`. The tree types `Structure` and `Document` move to package `gedcom` (`gedcom7` keeps them as aliases); the grammars live under `grammar/gedcom7/` and `grammar/gedcom551/`, `task grammar:generate GRAMMAR=…`
+
+### Added
+
+- `gedcom551`: GEDCOM 5.5.1 read into the same tree as GEDCOM 7. The grammar (`grammar/gedcom551/gedcom551.abnf`) is written from the 5.5.1 specification's line syntax and primitive data types; a line types nothing, so a payload its data type rejects is still read, and `CONC`/`CONT` are folded. `ParseDate` reads a `DATE_VALUE` with the calendar escape, `B.C.`, the dual year, `INT … (phrase)` and `(phrase)`. The tree types `Structure` and `Document` move to package `gedcom` (`gedcom7` keeps them as aliases); the grammars live under `grammar/gedcom7/` and `grammar/gedcom551/`, `task grammar:generate GRAMMAR=…` (#24)
+
 ## [0.5.0] - 2026-11-02
 
 - README status says what is built and what finishes 5.5.1: the Geni export round-tripped 5.5.1 → 7 → 5.5.1 and equal to the original. The roadmap epic and #7 say the same; a new item for the writer back to 5.5.1 (story 006)
