@@ -106,4 +106,4 @@ longitude; two spaces after the level as an `ERROR`.
 - [x] tests express the acceptance table and pass
 - [x] README
 - [x] changelog entry
-- [ ] issue closed with a link to the release
+- [x] issue closed with a link to the release

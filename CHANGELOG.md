@@ -9,15 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2026-11-02
 
-- `grammar/gedcom7.abnf` is LR(1) and declares no conflicts, so `tree-sitter generate` rejects any ambiguity. `day` and `year` are aliases of `integer` (the tree has `(day)` where it had `(day (integer))`), the delimiter before `TO`, `AND` and the epoch is part of that token, and a lone extension tag in a date is a calendar. `ParseDate` results are unchanged
-
 ### Changed
 
 - `grammar/gedcom7.abnf` is LR(1) and declares no conflicts, so `tree-sitter generate` rejects any ambiguity. `day` and `year` are aliases of `integer` (the tree has `(day)` where it had `(day (integer))`), the delimiter before `TO`, `AND` and the epoch is part of that token, and a lone extension tag in a date is a calendar. `ParseDate` results are unchanged (#14)
 
 ## [0.2.0] - 2026-11-02
-
-- `gedcom7/registry/`: the specification's registry (`extracted-files/tags`, one YAML per term) vendored at the pinned commit by `task registry:fetch` and embedded; `Standard()` reads it (`Structure`, `Substructure`, `Enumeration`) and `(*Registry).Validate` reports every violation with its line: a tag the registry does not place, a singleton repeated, a required substructure missing, an enumeration payload not in its set. `Structure.Line` is the file line a structure starts on
 
 ### Added
 
