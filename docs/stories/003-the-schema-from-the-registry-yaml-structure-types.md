@@ -97,4 +97,4 @@ said otherwise:
 
 - [x] tests express the acceptance tables and pass
 - [x] README, changelog entry
-- [ ] issue closed with a link to the release
+- [x] issue closed with a link to the release

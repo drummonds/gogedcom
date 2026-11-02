@@ -48,4 +48,4 @@ still an error. `task test`: the `ParseDate` table of story 001 unchanged,
 
 - [x] corpus and Go tests express the acceptance and pass
 - [x] changelog entry
-- [ ] issue closed with a link to the release
+- [x] issue closed with a link to the release

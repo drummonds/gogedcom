@@ -110,4 +110,4 @@ value.
 
 - [x] tests express the acceptance table and pass
 - [x] README status, changelog entry
-- [ ] issue closed with a link to the release
+- [x] issue closed with a link to the release
