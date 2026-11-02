@@ -11,10 +11,11 @@ tree-sitter generate → ts2go → a gotreesitter blob embedded in `gedcom7`.
 
 ## Status
 
-Stories 001 to 003: the grammar, the six GEDCOM 7 data types (`DateValue`,
+Stories 001 to 005: the grammar, the six GEDCOM 7 data types (`DateValue`,
 `Time`, `Age`, `PersonalName`, `Latitude`, `Longitude`) typed, a file read
-as a tree of structures, and the registry validating it: which structures
-go where, cardinality, enumerations. See [ROADMAP.md](ROADMAP.md).
+as a tree of structures, the registry validating it (which structures go
+where, cardinality, enumerations), and the tree written back as a file
+that reads to the same tree. See [ROADMAP.md](ROADMAP.md).
 
 ## Vocabulary
 
@@ -34,25 +35,29 @@ GEDCOM 7's own words, used in code, tests and docs.
 | Structure type | A registry term: a tag's meaning under a given superstructure (`DATE` is `DATE`, `DATE-exact` or `HEAD-DATE`), its payload type and substructures |
 | Cardinality | `{0:1}`, `{0:M}`, `{1:1}`, `{1:M}`: whether a substructure is required and whether it may repeat |
 | Violation | A structure that breaks the registry, reported with its line by `Validate` |
+| Line break in a payload | A `\n` in `Payload`; in the file it is a `CONT` line one level deeper, folded by `Read`, split by `Write` |
+| At-sign escape | A text payload whose value begins with `@` is written `@@…`; `Read` strips it, `Write` adds it; a pointer is never escaped |
+| Round trip | `Read(Write(doc))` equals `doc` in every field but `Line` |
 
 ## Packages
 
 | Package | Holds |
 |---|---|
-| `gedcom7` | The generated parser, typed data types, the reader, the registry and its validator; the vendored spec ABNF as reference |
+| `gedcom7` | The generated parser, typed data types, the reader and writer, the registry and its validator; the vendored spec ABNF as reference; the specification's test files under `testdata/` |
 | `grammar/` | The YABNF grammar, its generated `src/`, and the tree-sitter corpus tests |
 
 ## Toolchain
 
 `task grammar:generate` needs `tree-sitter2abnf` (Go), `npx tree-sitter-cli`
 (node) and a C compiler for `task grammar:test`. `task registry:fetch`
-refetches the registry. Consumers need none of them: the blob and the
+refetches the registry, `task testdata:fetch` the specification's test
+files (GEDCOM.io `testfiles/gedcom70`, pinned in the Taskfile). Consumers need none of them: the blob and the
 registry are in the module.
 
 ## Licence
 
-MIT. The vendored GEDCOM 7 grammar is Apache 2.0, FamilySearch
-(`gedcom7/LICENSE.gedcom`).
+MIT. The vendored GEDCOM 7 grammar, registry and test files are Apache
+2.0, FamilySearch (`gedcom7/LICENSE.gedcom`).
 
 ## Links
 

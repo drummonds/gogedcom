@@ -162,5 +162,11 @@ func parseLine(parser *gotreesitter.Parser, lang *gotreesitter.Language, line []
 	// *_line; its text is "TAG" or "TAG payload".
 	payloadLine := l.NamedChild(l.NamedChildCount() - 1)
 	s.Tag, s.Payload, _ = strings.Cut(payloadLine.Text(src), " ")
+	// A text payload beginning with "@" is written "@@" (the grammar's
+	// lineStr); the tree holds the value. A pointer ("@I1@") never begins
+	// with two at-signs.
+	if strings.HasPrefix(s.Payload, "@@") {
+		s.Payload = s.Payload[1:]
+	}
 	return s, level, nil
 }

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-02
+
+- `gedcom7.Write`: the tree as a GEDCOM 7 file (LF line ends, `CONT` for line breaks, the at-sign escape on text payloads), refusing a payload with a carriage return or a tag or cross-reference identifier the grammar rejects; reading what it wrote gives the same tree. `Read` strips the at-sign escape, so `Payload` holds the value (`@x`, not `@@x`). The specification's test files vendored under `gedcom7/testdata/gedcom70` (`task testdata:fetch`)
+
+### Added
+
+- `gedcom7.Write`: the tree as a GEDCOM 7 file (LF line ends, `CONT` for line breaks, the at-sign escape on text payloads), refusing a payload with a carriage return or a tag or cross-reference identifier the grammar rejects; reading what it wrote gives the same tree. `Read` strips the at-sign escape, so `Payload` holds the value (`@x`, not `@@x`). The specification's test files vendored under `gedcom7/testdata/gedcom70` (`task testdata:fetch`) (#18)
+
 ## [0.3.0] - 2026-11-02
 
 ### Changed

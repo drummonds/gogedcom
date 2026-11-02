@@ -5,6 +5,9 @@ vars:
   # The extracted ABNF lags the release tags (7.0.18's tag still carries the
   # 7.0.17 Longitude typo), so it is pinned to a commit on main, not a tag.
   GEDCOM7_COMMIT: 073b78b2f43027eb513de394344b3b3e4bba0489
+  # The GEDCOM.io commit the test files under gedcom7/testdata come from.
+  GEDCOMIO_COMMIT: c52d510324ecf961b3632834e7948afb771513e6
+  GEDCOMIO_TESTFILES: age date escapes extension-record extensions filename-1 lang long-url maximal70-lds maximal70-memories1 maximal70-memories2 maximal70-tree1 maximal70-tree2 maximal70 minimal70 notes-1 obje-1 remarriage1 remarriage2 same-sex-marriage voidptr warnings70 xref
 
 tasks:
   fmt:
@@ -43,6 +46,12 @@ tasks:
       - rm -rf .task/spec && mkdir -p .task/spec
       - curl -sSfL https://github.com/FamilySearch/GEDCOM/archive/{{.GEDCOM7_COMMIT}}.tar.gz | tar -xzf - -C .task/spec --strip-components=3 --wildcards '*/extracted-files/tags/*'
       - rm -rf gedcom7/registry && mv .task/spec gedcom7/registry
+
+  testdata:fetch:
+    desc: Refetch the specification's GEDCOM 7 test files (GEDCOM.io testfiles/gedcom70) at GEDCOMIO_COMMIT into gedcom7/testdata/gedcom70
+    cmds:
+      - mkdir -p gedcom7/testdata/gedcom70
+      - for f in {{.GEDCOMIO_TESTFILES}}; do curl -sSfL -o gedcom7/testdata/gedcom70/$f.ged https://raw.githubusercontent.com/FamilySearch/GEDCOM.io/{{.GEDCOMIO_COMMIT}}/testfiles/gedcom70/$f.ged; done
 
   grammar:generate:
     desc: 'The tree-sitter chain: grammar/gedcom7.abnf -> grammar.json -> parser.c -> gedcom7/grammar_blobs/gedcom7.bin'
