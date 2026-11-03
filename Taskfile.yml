@@ -78,6 +78,7 @@ tasks:
     cmds:
       - task-plus md2html --file index.md --dst docs
       - for f in docs/stories/*.md; do task-plus md2html --file "$f" --dst docs/stories; done
+      - for f in docs/*.md; do [ -e "$f" ] && task-plus md2html --file "$f" --dst docs || true; done
       - for f in docs/*.d2; do [ -e "$f" ] && d2 --scale 1 "$f" "${f%.d2}.svg" || true; done
 
   clean:

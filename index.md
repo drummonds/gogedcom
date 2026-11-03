@@ -10,4 +10,5 @@ GEDCOM 7 and 5.5.1 in Go, parsed from the specification's own ABNF, with a
 - [Story 005 — A writer: GEDCOM 7 out of the tree, read back to the same tree](stories/005-a-writer-gedcom-7-out-of-the-tree-read-back-to-the.html)
 - [Story 006 — README status and the roadmap: the Geni round trip as the goal](stories/006-readme-status-and-the-roadmap-the-geni-round-trip.html)
 - [Story 007 — The 5.5.1 grammar from its specification, and the reader on the 7 reader's tree](stories/007-the-5-5-1-grammar-from-its-specification-and-the.html)
+- [Round tripping: where it loses](round-trip.html) — research for the converter stories
 - Source: [git.bytestone.uk/hum3/gogedcom](https://git.bytestone.uk/hum3/gogedcom), mirror [github.com/drummonds/gogedcom](https://github.com/drummonds/gogedcom)

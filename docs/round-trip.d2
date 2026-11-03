@@ -1,0 +1,19 @@
+direction: down
+
+geni: "5.5.1 file\n(the Geni export)"
+tree: "tree\n(5.5.1 payloads verbatim)"
+tree7: "7 tree"
+file7: "7 file"
+tree7b: "7 tree, read back"
+treeb: "tree, back"
+fileb: "5.5.1 file, back"
+
+geni -> tree: "gedcom551.Read\nfolds CONC and CONT; drops BOM, indentation, empty lines"
+tree -> tree7: "convert.To7 (story 008)\nre-spellings keep the wording in PHRASE"
+tree7 -> file7: "gedcom7.Write\nsplits line breaks into CONT; escapes a leading @"
+file7 -> tree7b: "gedcom7.Read"
+tree7b -> treeb: "convert.To551 (#22)\nPHRASE back to the payload"
+treeb -> fileb: "5.5.1 writer (#22)\nsplits into CONC and CONT"
+tree <-> treeb: "equal (#7)\nby the rules of story 006" {
+  style.stroke-dash: 3
+}
