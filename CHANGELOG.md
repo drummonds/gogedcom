@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-04
+
+- Story 008 proposed, the 5.5.1 to 7 converter: the mapping rule (7's grammar decides what must change, the registry what may change losslessly, everything else passes through), the decision table to come in `docs/convert-551-to-7.md`. `docs/round-trip.md` is the research behind it: every point on the 5.5.1 → 7 → 5.5.1 trip where information is lost, comes back changed or stops the trip, with a verdict per row and what the code does today; `task docs:build` renders `docs/*.md`
+
+### Added
+
+- Story 008 proposed, the 5.5.1 to 7 converter: the mapping rule (7's grammar decides what must change, the registry what may change losslessly, everything else passes through), the decision table to come in `docs/convert-551-to-7.md`. `docs/round-trip.md` is the research behind it: every point on the 5.5.1 → 7 → 5.5.1 trip where information is lost, comes back changed or stops the trip, with a verdict per row and what the code does today; `task docs:build` renders `docs/*.md` (#26)
+
+### Roadmap
+
+- #1 The specification's ABNF as a Go parser: the data types (date, time, age, name, latitude, longitude) typed from the vendored grammar, and the file as a tree of structures
+- #2 The structure schema from the specification's YAML registry: which structures go where, cardinality, enumerations; a validator that reports every violation with its line
+- #5 A 5.5.1 ABNF in house style, written from the 5.5.1 specification, and the reader on the same structure as the 7 reader
+
 ## [0.6.0] - 2026-11-02
 
 - `gedcom551`: GEDCOM 5.5.1 read into the same tree as GEDCOM 7. The grammar (`grammar/gedcom551/gedcom551.abnf`) is written from the 5.5.1 specification's line syntax and primitive data types; a line types nothing, so a payload its data type rejects is still read, and `CONC`/`CONT` are folded. `ParseDate` reads a `DATE_VALUE` with the calendar escape, `B.C.`, the dual year, `INT … (phrase)` and `(phrase)`. The tree types `Structure` and `Document` move to package `gedcom` (`gedcom7` keeps them as aliases); the grammars live under `grammar/gedcom7/` and `grammar/gedcom551/`, `task grammar:generate GRAMMAR=…`
