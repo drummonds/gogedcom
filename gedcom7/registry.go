@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"slices"
 	"strings"
 	"sync"
 
@@ -105,6 +106,19 @@ func (r *Registry) Substructure(super *StructureType, tag string) *StructureType
 		uri = super.URI
 	}
 	return r.byTag[uri][tag]
+}
+
+// Types is every structure type whose standard tag is tag, by URI; nil
+// for a tag the registry does not know.
+func (r *Registry) Types(tag string) []*StructureType {
+	var out []*StructureType
+	for _, s := range r.structures {
+		if s.Tag == tag {
+			out = append(out, s)
+		}
+	}
+	slices.SortFunc(out, func(a, b *StructureType) int { return strings.Compare(a.URI, b.URI) })
+	return out
 }
 
 // Enumeration is the tags of the set's values, in the registry's order, or

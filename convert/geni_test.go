@@ -1,0 +1,123 @@
+package convert
+
+import (
+	"bytes"
+	"os"
+	"reflect"
+	"slices"
+	"strings"
+	"testing"
+
+	"git.bytestone.uk/hum3/gogedcom/gedcom"
+	"git.bytestone.uk/hum3/gogedcom/gedcom551"
+	"git.bytestone.uk/hum3/gogedcom/gedcom7"
+)
+
+// TestTo7Geni converts the author's Geni.com export when GOGEDCOM_GENI
+// names it (story 006: the file is not in the repo).
+func TestTo7Geni(t *testing.T) {
+	path := os.Getenv("GOGEDCOM_GENI")
+	if path == "" {
+		t.Skip("GOGEDCOM_GENI not set")
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	in, err := gedcom551.Read(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	out, err := To7(in)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if v := gedcom7.Standard().Validate(out); len(v) > 0 {
+		t.Errorf("%d violations, the first %v", len(v), v[0])
+	}
+
+	counts := map[string]int{}
+	for _, r := range out.Records {
+		counts[r.Tag]++
+	}
+	for tag, want := range map[string]int{"INDI": 1976, "FAM": 722, "SUBM": 187, "SNOTE": 164, "OBJE": 1448, "NOTE": 0, "SOUR": 0} {
+		if counts[tag] != want {
+			t.Errorf("%s records = %d, want %d", tag, counts[tag], want)
+		}
+	}
+
+	var tags []string
+	if schma := out.Header.Find("SCHMA"); schma != nil {
+		for _, s := range schma.All("TAG") {
+			tag, _, _ := strings.Cut(s.Payload, " ")
+			tags = append(tags, tag)
+		}
+	}
+	if want := []string{"_ADDR", "_EMAIL", "_PHON", "_PHRASE"}; !slices.Equal(tags, want) {
+		t.Errorf("SCHMA tags = %q, want %q", tags, want)
+	}
+
+	// Every payload of the input is in the output verbatim, but for the
+	// rows that re-spell: RFN (EXID drops the prefix), FORM (a media type),
+	// VERS and CHAR (the header's constants).
+	payloads := map[string]bool{}
+	datePhrases := 0
+	var collect func(s *gedcom.Structure)
+	collect = func(s *gedcom.Structure) {
+		payloads[s.Payload] = true
+		if s.Tag == "DATE" && s.Find("PHRASE") != nil {
+			datePhrases++
+		}
+		for _, c := range s.Substructures {
+			collect(c)
+		}
+	}
+	collect(out.Header)
+	for _, r := range out.Records {
+		collect(r)
+	}
+	if datePhrases != 1 {
+		t.Errorf("DATE with PHRASE = %d, want 1", datePhrases)
+	}
+	missing := 0
+	var check func(s *gedcom.Structure)
+	check = func(s *gedcom.Structure) {
+		switch s.Tag {
+		case "RFN", "FORM", "VERS", "CHAR":
+		default:
+			if s.Payload != "" && !payloads[s.Payload] {
+				if missing++; missing <= 5 {
+					t.Errorf("line %d: %s %q not in the output", s.Line, s.Tag, s.Payload)
+				}
+			}
+		}
+		for _, c := range s.Substructures {
+			check(c)
+		}
+	}
+	check(in.Header)
+	for _, r := range in.Records {
+		check(r)
+	}
+
+	var buf bytes.Buffer
+	if err := gedcom7.Write(&buf, out); err != nil {
+		t.Fatal(err)
+	}
+	back, err := gedcom7.Read(&buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	clearLines(out.Header)
+	clearLines(back.Header)
+	for _, d := range [][]*gedcom.Structure{out.Records, back.Records} {
+		for _, r := range d {
+			clearLines(r)
+		}
+	}
+	if !reflect.DeepEqual(out, back) {
+		t.Error("the written file reads back differently")
+	}
+}

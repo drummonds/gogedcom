@@ -18,7 +18,10 @@ GEDCOM 7 is read as a tree of structures, validated against the
 specification's registry, and written back to a file that reads to the
 same tree; the six data types are typed. GEDCOM 5.5.1 is read into the
 same tree, every payload kept as the file has it, with `DATE` values typed
-on demand; nothing converts or writes 5.5.1 yet.
+on demand, and `convert.To7` turns that tree into a GEDCOM 7 tree by the
+rules in [docs/convert-551-to-7.md](docs/convert-551-to-7.md): the Geni
+export converts, validates clean and writes as 7. Nothing writes 5.5.1
+yet.
 
 The finish line for 5.5.1 is one file: the author's own tree exported from
 Geni.com as GEDCOM 5.5.1 (60,126 lines; 1,976 `INDI`, 722 `FAM`; the
@@ -55,6 +58,8 @@ at the end.
 | `CONC` (5.5.1) | A continuation line whose payload joins its parent's without a separator; folded by `gedcom551.Read` like `CONT` |
 | Typed value (5.5.1) | A data type parsed on its own from its tag and payload, `DATE 11 MAR 1961`: the 5.5.1 grammar's second entry, since a 5.5.1 line types nothing and the file is the contract (story 007) |
 | Calendar escape (5.5.1) | `@#DJULIAN@` before a date, where 7 writes `JULIAN`; `Date.Calendar` holds the name |
+| Relocated standard structure | A standard tag in a place 7 gives it none (`ADDR` under `INDI`): converted as the extension tag `_ADDR`, declared in `SCHMA` with the standard URI, so a 7 reader knows what it is and the inverse can put it back |
+| `_PHRASE` | `PHRASE` relocated under a structure 7 gives no `PHRASE` to: the original wording of a `NAME` the converter repaired |
 
 ## Packages
 
@@ -63,6 +68,7 @@ at the end.
 | `gedcom` | The tree both readers return: `Structure`, `Document` |
 | `gedcom7` | The generated parser, typed data types, the reader and writer, the registry and its validator; the vendored spec ABNF as reference; the specification's test files under `testdata/` |
 | `gedcom551` | The generated 5.5.1 parser, the reader, `ParseDate` |
+| `convert` | `To7`: the 5.5.1 tree as a 7 tree, by the decision table in `docs/convert-551-to-7.md`; `rules.go` is the table's tag rows |
 | `grammar/gedcom7/`, `grammar/gedcom551/` | Each grammar in YABNF, its generated `src/`, and its tree-sitter corpus tests |
 
 ## Toolchain

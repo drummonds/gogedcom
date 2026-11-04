@@ -68,3 +68,18 @@ func TestCardinalityString(t *testing.T) {
 		}
 	}
 }
+
+func TestTypes(t *testing.T) {
+	r := Standard()
+	var uris []string
+	for _, s := range r.Types("DATE") {
+		uris = append(uris, s.URI)
+	}
+	want := []string{v7 + "DATA-EVEN-DATE", v7 + "DATE", v7 + "DATE-exact", v7 + "HEAD-DATE", v7 + "NO-DATE"}
+	if !slices.Equal(uris, want) {
+		t.Errorf("Types(DATE) = %q, want %q", uris, want)
+	}
+	if r.Types("BOGUS") != nil {
+		t.Error("Types(BOGUS) should be nil")
+	}
+}
