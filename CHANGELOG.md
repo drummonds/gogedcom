@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-04
+
+- `convert.To7`: the 5.5.1 tree as a GEDCOM 7 tree by the decision table in `docs/convert-551-to-7.md`, which names every 5.5.1 tag's rule and is held to `convert/rules.go` by a test. 7's grammar decides what must change (a `DATE`, `AGE` or `NAME` it rejects is re-spelt with the original in `PHRASE` or `_PHRASE`), the registry and the migration guide what may change losslessly (`NOTE` records to `SNOTE`, `RFN`/`AFN`/`RIN` to `EXID`, `FONE`/`ROMN` to `TRAN`, `RELA` to `ROLE`, enumerations upper-cased, media types, inline `OBJE` and `SOUR` to records, an empty `ADDR` composed from its pieces), and a standard tag out of its 7 place is relocated as `_ADDR` declared in `SCHMA`. The Geni export converts, validates with no violation and reads back from the written 7 file equal. `gedcom7.Registry.Types` lists a tag's terms (#26)
+
+### Added
+
+- `convert.To7`: the 5.5.1 tree as a GEDCOM 7 tree by the decision table in `docs/convert-551-to-7.md`, which names every 5.5.1 tag's rule and is held to `convert/rules.go` by a test. 7's grammar decides what must change (a `DATE`, `AGE` or `NAME` it rejects is re-spelt with the original in `PHRASE` or `_PHRASE`), the registry and the migration guide what may change losslessly (`NOTE` records to `SNOTE`, `RFN`/`AFN`/`RIN` to `EXID`, `FONE`/`ROMN` to `TRAN`, `RELA` to `ROLE`, enumerations upper-cased, media types, inline `OBJE` and `SOUR` to records, an empty `ADDR` composed from its pieces), and a standard tag out of its 7 place is relocated as `_ADDR` declared in `SCHMA`. The Geni export converts, validates with no violation and reads back from the written 7 file equal. `gedcom7.Registry.Types` lists a tag's terms (#26) (#26)
+
 ## [0.7.0] - 2026-11-04
 
 - Story 008 proposed, the 5.5.1 to 7 converter: the mapping rule (7's grammar decides what must change, the registry what may change losslessly, everything else passes through), the decision table to come in `docs/convert-551-to-7.md`. `docs/round-trip.md` is the research behind it: every point on the 5.5.1 → 7 → 5.5.1 trip where information is lost, comes back changed or stops the trip, with a verdict per row and what the code does today; `task docs:build` renders `docs/*.md`
