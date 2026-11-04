@@ -20,7 +20,7 @@ against, so a change that moves a row should move its test.
 | open | the rule is not decided yet |
 
 Stage status: 5.5.1 read is built (story 007); 7 write and read are
-built (story 005); 5.5.1 to 7 is proposed (story 008); 7 to 5.5.1 and
+built (story 005); 5.5.1 to 7 is built (story 008); 7 to 5.5.1 and
 the 5.5.1 writer are not started (#22); the comparison is not started (#7).
 
 ## Reading 5.5.1
@@ -38,14 +38,14 @@ the 5.5.1 writer are not started (#22); the comparison is not started (#7).
 | `CHAR ANSEL` or `ANSI` | fails | No transcoding; the reader takes UTF-8 | `UTF-8` |
 | A `DATE` or `NAME` payload its data type rejects | lossless | The line types nothing; the payload is text | `5  1801`, `Louise/Louisa`, a three-slash name |
 
-## Converting 5.5.1 to 7 (story 008, proposed)
+## Converting 5.5.1 to 7 (story 008, built)
 
 | Input | Verdict | What happens | In the Geni file |
 |---|---|---|---|
 | A standard structure in a place the 7 registry allows, payload 7 accepts | lossless | Unchanged | most of the file |
 | A standard structure where 7 has no place for it (`INDI.ADDR`, `ADDR.EMAIL`) | lossless | Relocated: `_ADDR` declared in `SCHMA` with the standard URI; the inverse maps the URI back | 67 `ADDR`, 59 `EMAIL`, 8 `PHON` |
 | An extension tag | lossless | Passes through undocumented | `_MARNM` 1,848, `_PRIM` 295 |
-| A `DATE` 7 spells differently (calendar escape, `B.C.`, dual year, `INT`, a phrase) | lossless | 7 spelling with `PHRASE` the original; the inverse writes the `PHRASE` | none |
+| A `DATE` 7 spells differently (calendar escape, `B.C.`, dual year, `INT`, a phrase) | lossless | 7 spelling with `PHRASE` the original; the inverse writes the `PHRASE`. A date 7 accepts as written (`02 APR 2023`) passes verbatim | none; 269 zero-padded days pass |
 | A `DATE` the 7 grammar rejects | lossless | `DATE` with no payload and `PHRASE` the original | `5  1801` |
 | An `AGE` word or a form 7 rejects | lossless | `< 8y` and the like with `PHRASE` the original | none |
 | A `NAME` the 7 grammar rejects (one slash, three, a tab) | lossless | Slashes and tabs to spaces; `_PHRASE` (relocated `PHRASE`) the original | 2 |

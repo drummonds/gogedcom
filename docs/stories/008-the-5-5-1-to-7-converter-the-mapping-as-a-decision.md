@@ -1,6 +1,6 @@
 # 008 — The 5.5.1 to 7 converter: the mapping as a decision table, every structure accounted for, the wording kept in PHRASE (#26)
 
-**Status:** proposed
+**Status:** done
 **Roadmap:** #6 — the 5.5.1 to 7 converter
 
 ## Why
@@ -134,6 +134,20 @@ The Geni export (`GOGEDCOM_GENI`, skipped when unset):
 The mapping document: every tag in the 5.5.1 specification's Appendix A
 has a row; the test agrees with `convert/rules.go`.
 
+## What building it taught
+
+Three rows moved between the proposal and the code, each in the rule's
+own direction. A `DATE` the 7 grammar accepts as written passes verbatim
+even when a rebuilt spelling would differ: Geni writes `02 APR 2023` in
+`CHAN`, 7's `Integer` takes the zero, and re-spelling 269 of them with a
+`PHRASE` each would have been change for its own sake. `1 RESN privacy`
+in the acceptance table was wrong: `PRIVACY` is in 7's `RESN` set, so it
+is upper-cased; `PEDI step` is the example of a value that stays. And two
+rules the proposal left to the placement row got their own: a `FORM`'s
+`TYPE` (5.5.1's source media type) is 7's `MEDI`, and a citation
+`EVEN.ROLE`, free text in 5.5.1, is handled as `RELA` is. `RIN`'s `TYPE`
+carries `HEAD.SOUR` after the `#`, as the guide's example does.
+
 ## Out of scope
 
 - The inverse, 7 to 5.5.1 (#22), and the comparison (#7). The `PHRASE`,
@@ -172,7 +186,7 @@ has a row; the test agrees with `convert/rules.go`.
 
 ## Done when
 
-- [ ] tests express the acceptance tables and pass, the Geni checks included
-- [ ] `docs/convert-551-to-7.md` with every 5.5.1 tag; README status, packages, vocabulary; `index.md`
-- [ ] changelog fragment
+- [x] tests express the acceptance tables and pass, the Geni checks included
+- [x] `docs/convert-551-to-7.md` with every 5.5.1 tag; README status, packages, vocabulary; `index.md`
+- [x] changelog fragment
 - [ ] issue closed with a link to the release
