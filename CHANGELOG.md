@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-05
+
+- Story 009 proposed, the 7 to 5.5.1 converter and the 5.5.1 writer: 008's rules read backwards with the wording taken from `PHRASE` when 008 would have written it, an `OBJE` record pointed to once inlined, and 7-native content 5.5.1 has no home for (`CREA`, `UID`, a `PHRASE` under `PEDI`) carried as an extension tag, the one rule for the whole list; `gedcom551.Write` on `gedcom7.Write`'s contract
+
+### Added
+
+- Story 009 proposed, the 7 to 5.5.1 converter and the 5.5.1 writer: 008's rules read backwards with the wording taken from `PHRASE` when 008 would have written it, an `OBJE` record pointed to once inlined, and 7-native content 5.5.1 has no home for (`CREA`, `UID`, a `PHRASE` under `PEDI`) carried as an extension tag, the one rule for the whole list; `gedcom551.Write` on `gedcom7.Write`'s contract (#29)
+
 ## [0.8.0] - 2026-11-04
 
 - `convert.To7`: the 5.5.1 tree as a GEDCOM 7 tree by the decision table in `docs/convert-551-to-7.md`, which names every 5.5.1 tag's rule and is held to `convert/rules.go` by a test. 7's grammar decides what must change (a `DATE`, `AGE` or `NAME` it rejects is re-spelt with the original in `PHRASE` or `_PHRASE`), the registry and the migration guide what may change losslessly (`NOTE` records to `SNOTE`, `RFN`/`AFN`/`RIN` to `EXID`, `FONE`/`ROMN` to `TRAN`, `RELA` to `ROLE`, enumerations upper-cased, media types, inline `OBJE` and `SOUR` to records, an empty `ADDR` composed from its pieces), and a standard tag out of its 7 place is relocated as `_ADDR` declared in `SCHMA`. The Geni export converts, validates with no violation and reads back from the written 7 file equal. `gedcom7.Registry.Types` lists a tag's terms (#26)
