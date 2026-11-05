@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-05
+
+- The round trip at file level (roadmap #7): the Geni export read as 5.5.1, converted to 7, written, read, converted back, written as 5.5.1 and read comes back equal to the original by story 006's rules, the header's provenance aside; the comparison lists every record that differs, and none does
+
+### Added
+
+- The round trip at file level (roadmap #7): the Geni export read as 5.5.1, converted to 7, written, read, converted back, written as 5.5.1 and read comes back equal to the original by story 006's rules, the header's provenance aside; the comparison lists every record that differs, and none does (#32)
+
 ## [0.10.0] - 2026-11-05
 
 - `convert.To551`: the 7 tree as a GEDCOM 5.5.1 tree by the decision table in `docs/convert-7-to-551.md`, 008's rules read backwards: the original wording back from `PHRASE` where 008 wrote it, `SNOTE` to `NOTE`, `EXID` to `RFN`/`AFN`/`RIN`, `TRAN` to `FONE`/`ROMN`, `ROLE OTHER` to `RELA`, enumerations in 5.5.1's case, media types to words, `SOUR @VOID@` to an inline citation, relocated `_ADDR` back to `ADDR`, an `OBJE` record pointed to once back inline, and 7-native content 5.5.1 has no home for (`CREA`, `UID`, a `PHRASE` under `PEDI`) carried as an extension tag. `gedcom551.Write` writes the tree as 5.5.1 on `gedcom7.Write`'s contract. The Geni export goes 5.5.1 → 7 → 5.5.1 in memory and comes back equal in every field but `Line`; the table is held to `convert/rules551.go` and to the registry's tag list by a test
