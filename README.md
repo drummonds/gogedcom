@@ -1,7 +1,7 @@
 # gogedcom
 
 GEDCOM 7 and GEDCOM 5.5.1 in Go, parsed from the specification's own ABNF
-rather than a hand transcription of it, with a 5.5.1 to 7 converter.
+rather than a hand transcription of it, with converters between the two.
 
 The GEDCOM 7 grammar (`grammar/gedcom7/gedcom7.abnf`, YABNF) is written
 from the specification's `extracted-files/grammar.abnf`, vendored at a
@@ -18,10 +18,14 @@ GEDCOM 7 is read as a tree of structures, validated against the
 specification's registry, and written back to a file that reads to the
 same tree; the six data types are typed. GEDCOM 5.5.1 is read into the
 same tree, every payload kept as the file has it, with `DATE` values typed
-on demand, and `convert.To7` turns that tree into a GEDCOM 7 tree by the
-rules in [docs/convert-551-to-7.md](docs/convert-551-to-7.md): the Geni
-export converts, validates clean and writes as 7. Nothing writes 5.5.1
-yet.
+on demand, and written back. `convert.To7` turns the 5.5.1 tree into a
+GEDCOM 7 tree by the rules in
+[docs/convert-551-to-7.md](docs/convert-551-to-7.md), and `convert.To551`
+turns a 7 tree into a 5.5.1 tree by the rules in
+[docs/convert-7-to-551.md](docs/convert-7-to-551.md), the first read
+backwards with 7-native content carried as extension tags. The Geni
+export converts to 7, validates clean, and converts back equal to what
+was read; the file-level trip and its comparison are what remains.
 
 The finish line for 5.5.1 is one file: the author's own tree exported from
 Geni.com as GEDCOM 5.5.1 (60,126 lines; 1,976 `INDI`, 722 `FAM`; the
@@ -59,7 +63,9 @@ at the end.
 | Typed value (5.5.1) | A data type parsed on its own from its tag and payload, `DATE 11 MAR 1961`: the 5.5.1 grammar's second entry, since a 5.5.1 line types nothing and the file is the contract (story 007) |
 | Calendar escape (5.5.1) | `@#DJULIAN@` before a date, where 7 writes `JULIAN`; `Date.Calendar` holds the name |
 | Relocated standard structure | A standard tag in a place 7 gives it none (`ADDR` under `INDI`): converted as the extension tag `_ADDR`, declared in `SCHMA` with the standard URI, so a 7 reader knows what it is and the inverse can put it back |
-| `_PHRASE` | `PHRASE` relocated under a structure 7 gives no `PHRASE` to: the original wording of a `NAME` the converter repaired |
+| `_PHRASE` | `PHRASE` relocated under a structure 7 gives no `PHRASE` to: the original wording of a `NAME` the converter repaired; in 5.5.1, a 7 `PHRASE` with no home (under `PEDI`, `SEX`, a `ROLE` from the set) |
+| Inlined record | An `OBJE` record that exactly one `OBJE` pointer names, written back to 5.5.1 as the inline `OBJE` it was: 5.5.1's inline `OBJE` is a record without an identifier |
+| 7-native extension | A standard 7 structure 5.5.1 does not have (`CREA`, `UID`, `MIME`), carried into 5.5.1 as `_CREA`, `_UID`, `_MIME` with everything under it, as 5.5.1 requires of a tag it does not define |
 
 ## Packages
 
@@ -67,8 +73,8 @@ at the end.
 |---|---|
 | `gedcom` | The tree both readers return: `Structure`, `Document` |
 | `gedcom7` | The generated parser, typed data types, the reader and writer, the registry and its validator; the vendored spec ABNF as reference; the specification's test files under `testdata/` |
-| `gedcom551` | The generated 5.5.1 parser, the reader, `ParseDate` |
-| `convert` | `To7`: the 5.5.1 tree as a 7 tree, by the decision table in `docs/convert-551-to-7.md`; `rules.go` is the table's tag rows |
+| `gedcom551` | The generated 5.5.1 parser, the reader and writer, `ParseDate` |
+| `convert` | `To7`: the 5.5.1 tree as a 7 tree, by the decision table in `docs/convert-551-to-7.md`; `To551`: the 7 tree as a 5.5.1 tree, by `docs/convert-7-to-551.md`; `rules.go` and `rules551.go` are the tables' tag rows |
 | `grammar/gedcom7/`, `grammar/gedcom551/` | Each grammar in YABNF, its generated `src/`, and its tree-sitter corpus tests |
 
 ## Toolchain
