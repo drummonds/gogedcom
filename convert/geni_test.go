@@ -121,3 +121,95 @@ func TestTo7Geni(t *testing.T) {
 		t.Error("the written file reads back differently")
 	}
 }
+
+// TestTo551Geni: the Geni export through To7 and To551 comes back equal to
+// what was read, and the 5.5.1 writer's file reads back the same.
+func TestTo551Geni(t *testing.T) {
+	path := os.Getenv("GOGEDCOM_GENI")
+	if path == "" {
+		t.Skip("GOGEDCOM_GENI not set")
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	in, err := gedcom551.Read(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	seven, err := To7(in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	back := To551(seven)
+
+	counts := map[string]int{}
+	for _, r := range back.Records {
+		counts[r.Tag]++
+	}
+	for tag, want := range map[string]int{"INDI": 1976, "FAM": 722, "SUBM": 187, "NOTE": 164, "OBJE": 0, "SNOTE": 0} {
+		if counts[tag] != want {
+			t.Errorf("%s records = %d, want %d", tag, counts[tag], want)
+		}
+	}
+
+	var buf bytes.Buffer
+	if err := gedcom551.Write(&buf, back); err != nil {
+		t.Fatal(err)
+	}
+	if n := bytes.Count(buf.Bytes(), []byte("\n")); n != 58627 {
+		t.Errorf("written lines = %d, want 58627", n)
+	}
+	again, err := gedcom551.Read(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, d := range []*gedcom.Document{in, back, again} {
+		clearLines(d.Header)
+		for _, r := range d.Records {
+			clearLines(r)
+		}
+	}
+	if !reflect.DeepEqual(in, back) {
+		t.Error("the trip changed the tree")
+		reportFirstDifference(t, in, back)
+	}
+	if !reflect.DeepEqual(back, again) {
+		t.Error("the written file reads back differently")
+	}
+}
+
+// reportFirstDifference names the first record and structure where the
+// two trees differ.
+func reportFirstDifference(t *testing.T, a, b *gedcom.Document) {
+	t.Helper()
+	var walk func(path string, x, y *gedcom.Structure) bool
+	walk = func(path string, x, y *gedcom.Structure) bool {
+		if x.Tag != y.Tag || x.Payload != y.Payload || x.XRef != y.XRef {
+			t.Errorf("%s: %s %s %q vs %s %s %q", path, x.XRef, x.Tag, x.Payload, y.XRef, y.Tag, y.Payload)
+			return true
+		}
+		for i := range min(len(x.Substructures), len(y.Substructures)) {
+			if walk(path+"/"+x.Tag, x.Substructures[i], y.Substructures[i]) {
+				return true
+			}
+		}
+		if len(x.Substructures) != len(y.Substructures) {
+			t.Errorf("%s/%s %s: %d vs %d substructures", path, x.Tag, x.Payload, len(x.Substructures), len(y.Substructures))
+			return true
+		}
+		return false
+	}
+	if walk("HEAD", a.Header, b.Header) {
+		return
+	}
+	for i := range min(len(a.Records), len(b.Records)) {
+		if walk("", a.Records[i], b.Records[i]) {
+			return
+		}
+	}
+	if len(a.Records) != len(b.Records) {
+		t.Errorf("%d vs %d records", len(a.Records), len(b.Records))
+	}
+}

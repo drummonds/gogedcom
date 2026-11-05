@@ -1,6 +1,6 @@
 # 009 — The 7 to 5.5.1 converter and writer: the inverse of 008, the wording back from PHRASE, 7-native content by one rule (#29)
 
-**Status:** proposed
+**Status:** done
 **Roadmap:** #22 — the 7 to 5.5.1 converter and the 5.5.1 writer
 
 ## Why
@@ -55,7 +55,7 @@ is [gedcom.io/migrate](https://gedcom.io/migrate).
 | An `OBJE` pointer whose record exactly one payload in the document names | Inlined: `OBJE` with no payload; its substructures the record's `FILE`s, each `FILE`'s `TITL` hoisted after it, then the pointer's own substructures (`_PRIM`), then the record's remaining substructures (`NOTE`); the record removed | inline obje |
 | `SOUR @VOID@` | `SOUR` with no payload; `DATA`, `OBJE`, `NOTE` and the rest stay | citation |
 | A `DATE` with a `PHRASE` 008 would have written (`date7(PHRASE)` is the payload) | The `PHRASE` as the payload: `JULIAN 1 JAN 1700` + `@#DJULIAN@ 1 JAN 1700` → the latter; `5  1801`, `(spring)`, `INT 1850 (war)` likewise | date |
-| A `DATE` with another `PHRASE` (7-native) | 5.5.1's own phrase form: `INT <date> (<phrase>)`, `(<phrase>)` when there is no date | date |
+| A `DATE` with another `PHRASE` (7-native, under a payload) | 5.5.1's own phrase form: `INT <date> (<phrase>)` | date |
 | A `DATE` 5.5.1's data type rejects, no `PHRASE` (`JULIAN …`, `FRENCH_R …`, `100 BCE`, `_ROMAN 71`) | 5.5.1's spelling: `@#DJULIAN@ …`, `@#DFRENCH R@ …`, `100 B.C.`, `@#DROMAN@ 71`; else unchanged | date |
 | An `AGE` with a `PHRASE` 008 would have written (`age7(PHRASE)` is the payload) | The `PHRASE` as the payload: `< 8y` + `CHILD` → `CHILD` | age |
 | An `AGE` with another `PHRASE` | `AGE` unchanged (7's forms are 5.5.1's), `_PHRASE` the phrase | age |
@@ -69,8 +69,9 @@ is [gedcom.io/migrate](https://gedcom.io/migrate).
 Rows compose. `_PHRASE` under `NAME` is first relocated back to `PHRASE`
 and then consumed by the name row; `_TRAN` from the extension row keeps
 its `LANG` and `_TYPE` as they are. A 7-native `DATE 1850` with
-`PHRASE 1850` comes back `DATE 1850`, the redundant phrase consumed: the
-only loss the date rows allow.
+`PHRASE 1850` comes back `DATE 1850`, the redundant phrase consumed, and
+a 7-native `DATE` with no payload and `PHRASE sometime` comes back
+`DATE sometime`: both are what 008 would have made of the result.
 
 ## The Geni file under the rules
 
@@ -136,7 +137,7 @@ Each rule, as 7 lines in, 5.5.1 lines out (`gedcom7.Read`, `To551`,
 | `0 @O1@ OBJE` / `1 FILE f` / `2 FORM image/png` / `3 MEDI PHOTO` pointed to twice, or never | the record stays, `2 FORM png` / `3 TYPE photo`; the pointers stay |
 | `1 SOUR @VOID@` / `2 DATA` / `3 TEXT t`; `1 SOUR @S1@` / `2 PAGE 3` | `1 SOUR` / `2 DATA` / `3 TEXT t`; `1 SOUR @S1@` / `2 PAGE 3` |
 | `2 DATE JULIAN 1 JAN 1700` / `3 PHRASE @@#DJULIAN@ 1 JAN 1700`; `2 DATE` / `3 PHRASE 5  1801`; `2 DATE 1850` / `3 PHRASE INT 1850 (war)`; `2 DATE` / `3 PHRASE (spring)` | `2 DATE @#DJULIAN@ 1 JAN 1700`; `2 DATE 5  1801`; `2 DATE INT 1850 (war)`; `2 DATE (spring)` |
-| `2 DATE 1850` / `3 PHRASE about the war`; `2 DATE` / `3 PHRASE sometime` | `2 DATE INT 1850 (about the war)`; `2 DATE (sometime)` |
+| `2 DATE 1850` / `3 PHRASE about the war`; `2 DATE` / `3 PHRASE sometime` | `2 DATE INT 1850 (about the war)`; `2 DATE sometime` |
 | `2 DATE JULIAN 1 JAN 1700`; `2 DATE 100 BCE`; `2 DATE FRENCH_R 1 VEND 8`; `2 DATE _ROMAN 71`; `2 DATE BET 1850 AND 1860`; `2 DATE 02 APR 2023` | `2 DATE @#DJULIAN@ 1 JAN 1700`; `2 DATE 100 B.C.`; `2 DATE @#DFRENCH R@ 1 VEND 8`; `2 DATE @#DROMAN@ 71`; unchanged; unchanged |
 | `2 AGE < 8y` / `3 PHRASE CHILD`; `2 AGE` / `3 PHRASE twenty`; `2 AGE 25y` / `3 PHRASE about` | `2 AGE CHILD`; `2 AGE twenty`; `2 AGE 25y` / `3 _PHRASE about` |
 | `1 NAME Louise Louisa` / `2 GIVN Louise` / `2 _PHRASE Louise/Louisa` | `1 NAME Louise/Louisa` / `2 GIVN Louise` |
@@ -165,6 +166,26 @@ tree, `back` is `To551(To7(in))`:
 
 The mapping document: every tag the 7 registry has a structure term for
 has a row; the test agrees with `convert/rules551.go`.
+
+## What building it taught
+
+One row of the proposal was wrong by its own rule. It said a 7-native
+`DATE` with no payload and `PHRASE sometime` would come back
+`DATE (sometime)`, but 008 writes exactly `DATE` + `PHRASE sometime` for
+a 5.5.1 `DATE sometime` (a payload the data type rejects, like
+`5  1801`), so `date7("sometime")` is the empty payload and the
+condition for "the phrase is the original" holds. Nothing in the 7 tree
+tells the two apart, and the Geni `5  1801` has to come back as written,
+so `DATE sometime` it is: a payload 5.5.1's line accepts and its data
+type rejects, which 007 made lawful. The `INT … (…)` form is therefore
+only for a 7-native phrase under a date with a payload.
+
+The rest built as proposed. The in-memory trip of the Geni export is
+equal in every field but `Line` at the first run, which says 008's
+conventions carried everything; the written file has 58,627 lines, the
+original's less its `CONC` lines. Checking every registry structure tag
+against the mapping table is cheap once the tag list is machine-readable
+(141 tags) and caught nothing, which is the point of it.
 
 ## Out of scope
 
@@ -205,7 +226,7 @@ has a row; the test agrees with `convert/rules551.go`.
 
 ## Done when
 
-- [ ] tests express the acceptance tables and pass, the Geni checks included
-- [ ] `docs/convert-7-to-551.md` with every 7 registry tag; `docs/round-trip.md` updated; README status, packages, vocabulary; `index.md`
-- [ ] changelog fragment
+- [x] tests express the acceptance tables and pass, the Geni checks included
+- [x] `docs/convert-7-to-551.md` with every 7 registry tag; `docs/round-trip.md` updated; README status, packages, vocabulary; `index.md`
+- [x] changelog fragment
 - [ ] issue closed with a link to the release

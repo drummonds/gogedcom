@@ -21,7 +21,7 @@ against, so a change that moves a row should move its test.
 
 Stage status: 5.5.1 read is built (story 007); 7 write and read are
 built (story 005); 5.5.1 to 7 is built (story 008); 7 to 5.5.1 and
-the 5.5.1 writer are not started (#22); the comparison is not started (#7).
+the 5.5.1 writer are built (story 009); the comparison is not started (#7).
 
 ## Reading 5.5.1
 
@@ -51,7 +51,7 @@ the 5.5.1 writer are not started (#22); the comparison is not started (#7).
 | A `NAME` the 7 grammar rejects (one slash, three, a tab) | lossless | Slashes and tabs to spaces; `_PHRASE` (relocated `PHRASE`) the original | 2 |
 | A `NOTE` record and pointers to it | lossless | `SNOTE`; 5.5.1 has `NOTE` records, so the inverse is one to one | 164 |
 | `RFN prefix:value`, `AFN`, `RIN` | lossless | `EXID value` with `TYPE …/RFN#prefix`; the inverse reads the fragment | 1,976 |
-| An inline `OBJE` | lossless for Geni, **open** in general | A new `OBJE` record per inline `OBJE`, `TITL` under `FILE`, `_PRIM` on the pointer. The inverse must fold the record back inline, and nothing marks a record as born inline: a 5.5.1 file with its own `OBJE` records, each pointed to once, would come back with them inlined. Options for #22: inline any record pointed to once; a marker on records the converter made; a hint from the caller | 1,448, no native `OBJE` records |
+| An inline `OBJE` | lossless for Geni, one way at an edge | A new `OBJE` record per inline `OBJE`, `TITL` under `FILE`, `_PRIM` on the pointer. Nothing marks a record as born inline, so the inverse (story 009) inlines any record exactly one `OBJE` pointer names: a 5.5.1 file with its own `OBJE` records, each pointed to once, comes back with them inlined | 1,448, no native `OBJE` records |
 | An inline `SOUR` with no payload | lossless | `SOUR @VOID@`, `DATA` and `OBJE` on the citation; the inverse writes `SOUR` with no payload | 1,317 |
 | An inline `SOUR` with a description payload | one way | A `SOUR` record with `TITL`; comes back as a pointer citation | none |
 | A media `FORM` | one way for `jpeg`, `tiff` | `jpg` and `jpeg` both become `image/jpeg`; the inverse writes `jpg`. The same for `tif` and `tiff` | `jpg`, `png`, `pdf`, `txt` |
@@ -79,36 +79,40 @@ the 5.5.1 writer are not started (#22); the comparison is not started (#7).
 | `12 _MONTH 1990`, an extension month after a day | fails | #19, since v0.3.0: the epoch token swallows the extension tag. 7-native only; 5.5.1 has no extension months | the spec's `date.ged`, `extensions.ged` |
 | `BET 1850 AND 1860` through `ParseDate` | lossless | Parses; the skip in `gedcom7_test.go` naming gotreesitter's GLR fork is stale (confirmed 2026-11-03) | yes |
 
-## Converting 7 to 5.5.1 and writing it (#22, not started)
+## Converting 7 to 5.5.1 and writing it (story 009, built)
 
-The Geni direction is covered above by each rule's inverse. 7-native
-content with no 5.5.1 home is the one-way direction of its own; the
-inverse has to choose between an extension tag, a `NOTE` and dropping,
-and #22 should decide once for the whole list.
+The Geni direction is covered above by each rule's inverse, and
+[convert-7-to-551.md](convert-7-to-551.html) is the table. 7-native
+content with no 5.5.1 home is the one-way direction of its own; story
+009 decided once for the whole list: an extension tag.
 
-| 7 structure | 5.5.1 has | Verdict | Note |
+| 7 structure | 5.5.1 has | Verdict | What happens |
 |---|---|---|---|
-| `TRAN` under `NAME`, `NOTE`, `PLAC`, `FILE`; `LANG`; `MIME` | `FONE`, `ROMN` for two cases; nothing else | one way | |
-| `CREA`, `UID`, `EXID` not from `RFN`/`AFN`/`RIN`, `SDATE`, `NO`, `INIL`, `CROP`, `FACT` | nothing (`WAC` for `INIL`) | one way | |
-| `PHRASE` under `DATE`, `AGE` | the payload itself | lossless | the `PHRASE` is written as the payload; a 7-native phrase that is not a 5.5.1 date value comes back as a date phrase `(…)` or stops |
-| `PHRASE` under `ROLE`, `PEDI`, `TYPE`, `SEX`, `RESN` | nothing | one way | |
-| `@VOID@` under `FAMC`, `FAMS`, `HUSB`, `WIFE`, `CHIL`, `ALIA` | nothing | one way | `SOUR @VOID@` alone has a 5.5.1 form (the inline citation) |
-| `BCE`; an extension calendar, month or epoch | `B.C.`; nothing | lossless; one way | |
-| `SEX X` | `M`, `F`, `U` | one way | |
-| Repeated `GIVN`, `SURN`, `NPFX`, `NSFX`, `SPFX`, `NICK` | one each | one way | join with a comma, as the guide splits |
-| `HEAD.LANG`, `SUBM.LANG`, `PLAC.LANG` as BCP 47 | 5.5.1 language names | one way | |
-| `SNOTE` under `HEAD` | nothing | one way | |
-| `FILE.FORM` as a media type | the 5.5.1 words | one way outside the table | `image/jpeg` to `jpg`; an unknown type has no word |
-| `SCHMA` | nothing | lossless | consumed: relocated tags become their standard tags, the rest dropped |
-| `OBJE` records with more than one pointer | `OBJE` records | lossless | stays a record; see the inline `OBJE` row above for the one-pointer case |
-| A line over 255 characters after `CONC` splitting | the limit | lossless | the writer splits at 255 or not at all; the comparison folds either way |
-| `CHAR`, `GEDC.FORM`, BOM | required | lossless | written as constants |
+| `TRAN` under `NAME`, `PLAC` with a `LANG` in the guide's table | `FONE`, `ROMN` with `TYPE` | lossless | the table backwards |
+| `TRAN` otherwise; `LANG` where 5.5.1 has none; `MIME`; `CREA`, `UID`, `EXID` not from `RFN`/`AFN`/`RIN`, `SDATE`, `NO`, `CROP` | nothing (`WAC` for `INIL`) | one way | `_TRAN`, `_MIME`, `_CREA`, `_UID`, `_EXID`, `_SDATE`, `_NO`, `_CROP`, everything under them unchanged; `LANG` stays as it is; `INIL` → `WAC` |
+| `PHRASE` under `DATE`, `AGE` that 008 wrote | the payload itself | lossless | the `PHRASE` is written as the payload |
+| `PHRASE` under `DATE` that is 7-native | `INT <date> (<phrase>)` | lossless | 5.5.1's own phrase form; a redundant `PHRASE 1850` under `DATE 1850` is consumed |
+| `PHRASE` under `ROLE OTHER` | `RELA` free text | lossless | the phrase is the `RELA` |
+| `PHRASE` under `AGE` (7-native), `PEDI`, `TYPE`, `SEX`, `RESN`, a `ROLE` from the set | nothing | one way | `_PHRASE` |
+| `@VOID@` under `FAMC`, `FAMS`, `HUSB`, `WIFE`, `CHIL`, `ALIA` | nothing | one way | unchanged: a dangling pointer rather than lost substructures. `SOUR @VOID@` alone has a 5.5.1 form (the inline citation) |
+| `BCE`; a calendar word; an extension calendar | `B.C.`; the escape; the escape without the underscore | lossless | `100 BCE` → `100 B.C.`, `JULIAN` → `@#DJULIAN@`, `_ROMAN` → `@#DROMAN@` |
+| `SEX X`; an enumeration value outside 7's set | `M`, `F`, `U` | one way | unchanged, as 008 leaves a value outside the set |
+| Repeated `GIVN`, `SURN`, `NPFX`, `NSFX`, `SPFX`, `NICK` | one each | one way | unchanged: the tree is written as it is |
+| `HEAD.LANG`, `SUBM.LANG`, `PLAC.LANG` as BCP 47 | 5.5.1 language names | one way | unchanged |
+| `SNOTE` under `HEAD` | nothing | one way | `NOTE` pointer, as any `SNOTE` pointer |
+| `FILE.FORM` as a media type | the 5.5.1 words | one way outside the table | `image/jpeg` → `jpg`, `image/tiff` → `tif`; an unknown type unchanged |
+| `FORM.MEDI` | `TYPE` in a record, `MEDI` in a link | lossless | by place |
+| `SCHMA` | nothing | lossless | consumed: relocated tags become their standard tags, the rest stay extensions |
+| `OBJE` records with more than one pointer, or none | `OBJE` records | lossless | stays a record; one pointer from an `OBJE` structure: inlined, see above |
+| A line over 255 characters | the limit | lossless | not split; the comparison folds either way |
+| `CHAR`, `GEDC.FORM`, BOM | required | lossless | `CHAR UTF-8` and `GEDC.FORM LINEAGE-LINKED` added by `To551` in 5.5.1's places; the writer writes LF, no BOM, every payload verbatim |
 
 ## What the Geni file is expected to show
 
 By the rows above, the Geni export round-trips with no difference: every
-one of its structures is on a lossless row. The residual risk is in the
-`open` row (the inverse must inline all 1,448 `OBJE` records) and in the
-rows marked "none" for the file, which no Geni test exercises and which
-need their own small fixtures. The counts in each table are from the
-export of 24 October 2026.
+one of its structures is on a lossless row, and story 009's test shows
+it in memory: `To551(To7(in))` equals `in` in every field but `Line`,
+all 1,448 `OBJE` records back inline. The file-level trip, written and
+read at both ends with the provenance fields excluded, is #7. The rows
+marked "none" for the file have their own small fixtures in the converter
+tests. The counts in each table are from the export of 24 October 2026.
