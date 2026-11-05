@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-05
+
+- `convert.To551`: the 7 tree as a GEDCOM 5.5.1 tree by the decision table in `docs/convert-7-to-551.md`, 008's rules read backwards: the original wording back from `PHRASE` where 008 wrote it, `SNOTE` to `NOTE`, `EXID` to `RFN`/`AFN`/`RIN`, `TRAN` to `FONE`/`ROMN`, `ROLE OTHER` to `RELA`, enumerations in 5.5.1's case, media types to words, `SOUR @VOID@` to an inline citation, relocated `_ADDR` back to `ADDR`, an `OBJE` record pointed to once back inline, and 7-native content 5.5.1 has no home for (`CREA`, `UID`, a `PHRASE` under `PEDI`) carried as an extension tag. `gedcom551.Write` writes the tree as 5.5.1 on `gedcom7.Write`'s contract. The Geni export goes 5.5.1 → 7 → 5.5.1 in memory and comes back equal in every field but `Line`; the table is held to `convert/rules551.go` and to the registry's tag list by a test
+
+### Added
+
+- `convert.To551`: the 7 tree as a GEDCOM 5.5.1 tree by the decision table in `docs/convert-7-to-551.md`, 008's rules read backwards: the original wording back from `PHRASE` where 008 wrote it, `SNOTE` to `NOTE`, `EXID` to `RFN`/`AFN`/`RIN`, `TRAN` to `FONE`/`ROMN`, `ROLE OTHER` to `RELA`, enumerations in 5.5.1's case, media types to words, `SOUR @VOID@` to an inline citation, relocated `_ADDR` back to `ADDR`, an `OBJE` record pointed to once back inline, and 7-native content 5.5.1 has no home for (`CREA`, `UID`, a `PHRASE` under `PEDI`) carried as an extension tag. `gedcom551.Write` writes the tree as 5.5.1 on `gedcom7.Write`'s contract. The Geni export goes 5.5.1 → 7 → 5.5.1 in memory and comes back equal in every field but `Line`; the table is held to `convert/rules551.go` and to the registry's tag list by a test (#29)
+
 ## [0.9.0] - 2026-11-05
 
 - Story 009 proposed, the 7 to 5.5.1 converter and the 5.5.1 writer: 008's rules read backwards with the wording taken from `PHRASE` when 008 would have written it, an `OBJE` record pointed to once inlined, and 7-native content 5.5.1 has no home for (`CREA`, `UID`, a `PHRASE` under `PEDI`) carried as an extension tag, the one rule for the whole list; `gedcom551.Write` on `gedcom7.Write`'s contract
