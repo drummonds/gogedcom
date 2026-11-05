@@ -171,45 +171,10 @@ func TestTo551Geni(t *testing.T) {
 			clearLines(r)
 		}
 	}
-	if !reflect.DeepEqual(in, back) {
-		t.Error("the trip changed the tree")
-		reportFirstDifference(t, in, back)
+	if d := differences(in, back); len(d) > 0 {
+		t.Errorf("the trip changed the tree:\n%s", strings.Join(d[:min(len(d), 20)], "\n"))
 	}
 	if !reflect.DeepEqual(back, again) {
 		t.Error("the written file reads back differently")
-	}
-}
-
-// reportFirstDifference names the first record and structure where the
-// two trees differ.
-func reportFirstDifference(t *testing.T, a, b *gedcom.Document) {
-	t.Helper()
-	var walk func(path string, x, y *gedcom.Structure) bool
-	walk = func(path string, x, y *gedcom.Structure) bool {
-		if x.Tag != y.Tag || x.Payload != y.Payload || x.XRef != y.XRef {
-			t.Errorf("%s: %s %s %q vs %s %s %q", path, x.XRef, x.Tag, x.Payload, y.XRef, y.Tag, y.Payload)
-			return true
-		}
-		for i := range min(len(x.Substructures), len(y.Substructures)) {
-			if walk(path+"/"+x.Tag, x.Substructures[i], y.Substructures[i]) {
-				return true
-			}
-		}
-		if len(x.Substructures) != len(y.Substructures) {
-			t.Errorf("%s/%s %s: %d vs %d substructures", path, x.Tag, x.Payload, len(x.Substructures), len(y.Substructures))
-			return true
-		}
-		return false
-	}
-	if walk("HEAD", a.Header, b.Header) {
-		return
-	}
-	for i := range min(len(a.Records), len(b.Records)) {
-		if walk("", a.Records[i], b.Records[i]) {
-			return
-		}
-	}
-	if len(a.Records) != len(b.Records) {
-		t.Errorf("%d vs %d records", len(a.Records), len(b.Records))
 	}
 }

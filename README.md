@@ -24,8 +24,11 @@ GEDCOM 7 tree by the rules in
 turns a 7 tree into a 5.5.1 tree by the rules in
 [docs/convert-7-to-551.md](docs/convert-7-to-551.md), the first read
 backwards with 7-native content carried as extension tags. The Geni
-export converts to 7, validates clean, and converts back equal to what
-was read; the file-level trip and its comparison are what remains.
+export converts to 7, validates clean, and round-trips at file level:
+read as 5.5.1, converted, written as 7, read, converted back, written as
+5.5.1 and read, the last tree equal to the first by the rules below. No
+difference remains (story 010; `TestRoundTripGeni` in `convert/` is the
+measure, run with `GOGEDCOM_GENI` naming the file).
 
 The finish line for 5.5.1 is one file: the author's own tree exported from
 Geni.com as GEDCOM 5.5.1 (60,126 lines; 1,976 `INDI`, 722 `FAM`; the

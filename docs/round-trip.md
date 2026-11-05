@@ -21,7 +21,8 @@ against, so a change that moves a row should move its test.
 
 Stage status: 5.5.1 read is built (story 007); 7 write and read are
 built (story 005); 5.5.1 to 7 is built (story 008); 7 to 5.5.1 and
-the 5.5.1 writer are built (story 009); the comparison is not started (#7).
+the 5.5.1 writer are built (story 009); the comparison and the file-level
+trip are built (story 010), and the Geni export passes.
 
 ## Reading 5.5.1
 
@@ -58,7 +59,7 @@ the 5.5.1 writer are built (story 009); the comparison is not started (#7).
 | An enumeration value (`PEDI birth`) | one way in case | Upper-cased for 7; the inverse writes 5.5.1's lower-case spelling, so `Birth` comes back `birth` | `SEX M`, `SEX F` only |
 | An enumeration value outside 7's set | lossless | Unchanged; `Validate` reports it | none |
 | An `ADDR` with no payload | one way at an edge | Payload composed from the pieces, one per line, because 7 requires it; the inverse drops a payload equal to the composition, so a 5.5.1 `ADDR` whose payload already equalled it would come back without one | 1,326 |
-| `HEAD.CHAR`, `HEAD.GEDC.FORM` | lossless | Dropped; constants of the format the 5.5.1 writer writes again; excluded from the comparison with the provenance fields | both |
+| `HEAD.CHAR`, `HEAD.GEDC.FORM` | lossless | Dropped; `To551` writes them again where 5.5.1 puts them, which is where Geni has them, so the comparison counts them | both |
 | `SUBN` record, `HEAD.SUBN`, `HEAD.FILE` | one way | Dropped: removed from 7 | none |
 | `FONE`, `ROMN` | one way | `TRAN` with `LANG` per the migration guide; the inverse would need the reverse table (not planned) | none |
 | `RELA` | lossless | `ROLE` from the set, else `ROLE OTHER` with `PHRASE`; the inverse writes the `PHRASE` or the set's word | none |
@@ -110,9 +111,11 @@ content with no 5.5.1 home is the one-way direction of its own; story
 ## What the Geni file is expected to show
 
 By the rows above, the Geni export round-trips with no difference: every
-one of its structures is on a lossless row, and story 009's test shows
-it in memory: `To551(To7(in))` equals `in` in every field but `Line`,
-all 1,448 `OBJE` records back inline. The file-level trip, written and
-read at both ends with the provenance fields excluded, is #7. The rows
-marked "none" for the file have their own small fixtures in the converter
-tests. The counts in each table are from the export of 24 October 2026.
+one of its structures is on a lossless row. Story 009's test shows it in
+memory, `To551(To7(in))` equal to `in` in every field but `Line`, all
+1,448 `OBJE` records back inline, and story 010's shows it at file level:
+through the 7 file and the 5.5.1 file, the last tree equal to the first
+with the header's provenance aside, by a comparison that lists every
+record that differs (none). The rows marked "none" for the file have
+their own small fixtures in the converter tests. The counts in each table
+are from the export of 24 October 2026.

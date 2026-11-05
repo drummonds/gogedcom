@@ -12,8 +12,8 @@ geni -> tree: "gedcom551.Read\nfolds CONC and CONT; drops BOM, indentation, empt
 tree -> tree7: "convert.To7 (story 008)\nre-spellings keep the wording in PHRASE"
 tree7 -> file7: "gedcom7.Write\nsplits line breaks into CONT; escapes a leading @"
 file7 -> tree7b: "gedcom7.Read"
-tree7b -> treeb: "convert.To551 (#22)\nPHRASE back to the payload"
-treeb -> fileb: "5.5.1 writer (#22)\nsplits into CONC and CONT"
-tree <-> treeb: "equal (#7)\nby the rules of story 006" {
+tree7b -> treeb: "convert.To551 (story 009)\nPHRASE back to the payload"
+treeb -> fileb: "gedcom551.Write (story 009)\nsplits line breaks into CONT"
+tree <-> treeb: "equal (story 010)\nby the rules of story 006" {
   style.stroke-dash: 3
 }
