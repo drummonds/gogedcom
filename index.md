@@ -12,6 +12,7 @@ converters between the two.
 - [Story 007 — The 5.5.1 grammar from its specification, and the reader on the 7 reader's tree](stories/007-the-5-5-1-grammar-from-its-specification-and-the.html)
 - [Story 008 — The 5.5.1 to 7 converter: the mapping as a decision table](stories/008-the-5-5-1-to-7-converter-the-mapping-as-a-decision.html)
 - [Story 009 — The 7 to 5.5.1 converter and writer: the inverse of 008](stories/009-the-7-to-5-5-1-converter-and-writer-the-inverse-of.html)
+- [Story 010 — The round trip at file level: the Geni export through both writers](stories/010-the-round-trip-at-file-level-the-geni-export.html)
 - [Converting 5.5.1 to 7: the mapping](convert-551-to-7.html) — the decision table and every 5.5.1 tag's rule
 - [Converting 7 to 5.5.1: the mapping](convert-7-to-551.html) — the inverse: the decision table and every 7 tag's rule
 - [Round tripping: where it loses](round-trip.html) — research for the converter stories
